@@ -443,18 +443,18 @@ h2 em {
 
 .footer-inner {
   display: grid;
-  grid-template-columns: 1fr 1.25fr;
-  gap: 36px;
+  grid-template-columns: minmax(360px, 1fr) auto;
+  gap: 34px;
+  align-items: center;
   width: min(calc(100% - var(--page-x) * 2), var(--max));
   margin: 0 auto;
-  padding: 34px 0 38px;
+  padding: 34px 0 40px;
   color: var(--muted);
   font-size: 14px;
   line-height: 1.7;
 }
 
-.footer-brand,
-.footer-meta {
+.footer-brand {
   display: grid;
   gap: 8px;
 }
@@ -464,27 +464,54 @@ h2 em {
   font-size: 17px;
 }
 
-.footer-meta {
-  justify-items: end;
-  text-align: right;
-}
-
-.footer-contact,
 .footer-links {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 10px 18px;
 }
 
-.footer-contact a,
+.footer-brand a,
 .footer-links a {
   color: var(--heading-soft);
 }
 
-.footer-meta p {
+.footer-brand p {
   color: #7a8794;
   font-size: 13px;
+}
+
+.footer-channels {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  gap: 12px;
+  grid-column: 2;
+  justify-content: end;
+}
+
+.qr-card {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  padding: 10px 10px 9px;
+  border: 1px solid rgba(219, 233, 234, 0.86);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 36px rgba(31, 78, 86, 0.07);
+}
+
+.qr-card img {
+  display: block;
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+.qr-card span {
+  color: var(--heading-soft);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1;
 }
 
 .reveal {
@@ -594,16 +621,17 @@ h2 em {
 
   .footer-inner {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
 
-  .footer-meta {
-    justify-items: start;
-    text-align: left;
-  }
-
-  .footer-contact,
   .footer-links {
     justify-content: flex-start;
+  }
+
+  .footer-channels {
+    grid-template-columns: repeat(3, 92px);
+    grid-column: auto;
+    justify-content: start;
   }
 }
 
@@ -685,5 +713,25 @@ h2 em {
     left: auto;
     width: calc(100% - 28px);
     margin: 280px 14px 14px;
+  }
+
+  .footer-inner {
+    padding: 30px 0 34px;
+  }
+
+  .footer-channels {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .qr-card {
+    padding: 12px 10px 10px;
+  }
+
+  .qr-card img {
+    width: min(23vw, 84px);
+    height: min(23vw, 84px);
   }
 }
