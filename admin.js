@@ -78,7 +78,17 @@ function renderRows(rows) {
     deleteButton.className = "admin-table-delete";
     deleteButton.type = "button";
     deleteButton.dataset.id = row.id;
-    deleteButton.textContent = "删除";
+    deleteButton.setAttribute("aria-label", `删除 ${row.name} 的预约记录`);
+    deleteButton.title = "删除";
+    deleteButton.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6h18" />
+        <path d="M8 6V4.8A1.8 1.8 0 0 1 9.8 3h4.4A1.8 1.8 0 0 1 16 4.8V6" />
+        <path d="M18.5 6l-.9 13.1A2 2 0 0 1 15.6 21H8.4a2 2 0 0 1-2-1.9L5.5 6" />
+        <path d="M10 11v5" />
+        <path d="M14 11v5" />
+      </svg>
+    `;
     actionCell.appendChild(deleteButton);
 
     tr.appendChild(selectCell);
