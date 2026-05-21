@@ -14,6 +14,7 @@ if (!bootstrapAdminPassword) {
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
+const host = process.env.HOST || "127.0.0.1";
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dbPath = path.join(dataDir, "demo-requests.sqlite");
@@ -307,6 +308,6 @@ app.use(express.static(rootDir, {
   index: "index.html",
 }));
 
-app.listen(port, () => {
-  console.log(`SUDO website server running at http://127.0.0.1:${port}`);
+app.listen(port, host, () => {
+  console.log(`SUDO website server running at http://${host}:${port}`);
 });
