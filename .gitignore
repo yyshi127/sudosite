@@ -2,3 +2,6 @@
 edge-profile/
 edge-profile-check/
 ~$*
+node_modules/
+data/
+test-results/

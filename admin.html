@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SUDO 数豆｜预约演示后台</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./admin.js" defer></script>
+  </head>
+  <body class="admin-page">
+    <header class="admin-header">
+      <a class="brand" href="/" aria-label="返回 SUDO 数豆首页">
+        <img src="./assets/sudo-logo-gray-source.png" alt="SUDO 数豆科技" />
+      </a>
+      <div class="admin-header-actions">
+        <span>预约演示后台</span>
+        <button class="admin-icon-button" id="admin-settings-open" type="button" aria-label="后台设置" title="后台设置">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 15.4A3.4 3.4 0 1 0 12 8.6a3.4 3.4 0 0 0 0 6.8Z" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2.06 2.06 0 0 1-2.91 2.91l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .24 1.7 1.7 0 0 0-.82 1.46V21a2.06 2.06 0 0 1-4.12 0v-.1a1.7 1.7 0 0 0-.82-1.46 1.7 1.7 0 0 0-1-.24 1.7 1.7 0 0 0-1.88.34l-.06.06a2.06 2.06 0 0 1-2.91-2.91l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.24-1 1.7 1.7 0 0 0-1.46-.82H3a2.06 2.06 0 0 1 0-4.12h.1a1.7 1.7 0 0 0 1.46-.82 1.7 1.7 0 0 0 .24-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2.06 2.06 0 0 1 2.91-2.91l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.24A1.7 1.7 0 0 0 10.82 2.9V3a2.06 2.06 0 0 1 4.12 0v-.1a1.7 1.7 0 0 0 .82 1.46 1.7 1.7 0 0 0 1 .24 1.7 1.7 0 0 0 1.88-.34l.06-.06a2.06 2.06 0 0 1 2.91 2.91l-.06.06A1.7 1.7 0 0 0 19.4 9c.09.33.09.67 0 1a1.7 1.7 0 0 0 1.46.82h.1a2.06 2.06 0 0 1 0 4.12h-.1a1.7 1.7 0 0 0-1.46.82Z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-shell">
+      <section class="admin-login" id="admin-login">
+        <p class="eyebrow">Admin access</p>
+        <h1>查看预约线索</h1>
+        <form class="admin-login-form" id="admin-login-form">
+          <label>
+            <span>后台密码</span>
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <p class="admin-status" id="admin-login-status" role="status" aria-live="polite"></p>
+          <button class="button primary" type="submit">进入后台</button>
+        </form>
+      </section>
+
+      <section class="admin-dashboard" id="admin-dashboard" hidden>
+        <div class="admin-toolbar">
+          <div>
+            <p class="eyebrow">Demo requests</p>
+            <h1>预约提交记录</h1>
+          </div>
+          <div class="admin-actions">
+            <span class="admin-count" id="admin-count">0 条记录</span>
+            <button class="button secondary admin-bulk-delete" id="admin-bulk-delete" type="button" disabled>删除选中</button>
+            <a class="button secondary" href="/api/admin/demo-requests.csv">导出 CSV</a>
+          </div>
+        </div>
+        <p class="admin-status" id="admin-dashboard-status" role="status" aria-live="polite"></p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th class="admin-select-cell">
+                  <input id="admin-select-all" type="checkbox" aria-label="全选预约记录" />
+                </th>
+                <th>提交时间</th>
+                <th>姓名</th>
+                <th>手机号</th>
+                <th>公司名称</th>
+                <th>需求备注</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="admin-requests-body"></tbody>
+          </table>
+          <div class="admin-empty" id="admin-empty" hidden>暂无预约提交记录</div>
+        </div>
+      </section>
+
+      <div class="admin-settings-modal" id="admin-settings" aria-hidden="true">
+        <div class="admin-settings-backdrop" data-settings-close></div>
+        <section class="admin-settings-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-settings-title">
+          <button class="demo-close" type="button" aria-label="关闭设置" data-settings-close>×</button>
+          <div>
+            <p class="eyebrow">Security</p>
+            <h2 id="admin-settings-title">后台设置</h2>
+            <p class="admin-settings-intro">管理后台访问密码。修改成功后需要重新登录。</p>
+          </div>
+          <form class="admin-password-form" id="admin-password-form">
+            <label>
+              <span>当前密码</span>
+              <input name="currentPassword" type="password" autocomplete="current-password" required />
+            </label>
+            <label>
+              <span>新密码</span>
+              <input name="newPassword" type="password" autocomplete="new-password" minlength="8" required />
+            </label>
+            <label>
+              <span>确认新密码</span>
+              <input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required />
+            </label>
+            <p class="admin-status" id="admin-password-status" role="status" aria-live="polite"></p>
+            <button class="button primary" type="submit">保存新密码</button>
+          </form>
+        </section>
+      </div>
+
+      <div class="admin-delete-modal" id="admin-delete-modal" aria-hidden="true">
+        <div class="admin-delete-backdrop" data-delete-close></div>
+        <section class="admin-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-delete-title">
+          <button class="demo-close" type="button" aria-label="关闭删除确认" data-delete-close>×</button>
+          <p class="eyebrow">Delete confirmation</p>
+          <h2 id="admin-delete-title">确认删除预约记录</h2>
+          <p class="admin-delete-intro" id="admin-delete-intro"></p>
+          <div class="admin-delete-list" id="admin-delete-list"></div>
+          <p class="admin-status" id="admin-delete-status" role="status" aria-live="polite"></p>
+          <div class="admin-delete-actions">
+            <button class="button secondary" type="button" data-delete-close>取消</button>
+            <button class="button primary admin-confirm-delete" id="admin-confirm-delete" type="button">确认删除</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

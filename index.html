@@ -30,13 +30,13 @@
           <p class="eyebrow">AI-native finance for global operators</p>
           <h1>
             <span>用 <em>AI</em> 重新定义财务</span>
-            <span>让<span class="tone-brand">企业出海</span><em><span class="tone-ink">更</span>轻、<span class="tone-ink">更</span>快、<span class="tone-ink">更</span>稳</em></span>
+            <span>让<span class="tone-brand">企业出海</span><em class="hero-result"><span class="tone-ink">更</span>轻、<span class="tone-ink">更</span>快、<span class="tone-ink">更</span>稳</em></span>
           </h1>
           <p>
             数豆科技致力于为中国出海企业提供一站式全球业财税合规数智化解决方案
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#contact">预约产品演示</a>
+            <a class="button primary demo-trigger" href="#demo-request">预约产品演示</a>
             <a class="button secondary" href="#value">查看出海价值</a>
           </div>
         </div>
@@ -62,7 +62,7 @@
         <div class="chapter-copy">
           <p class="eyebrow">Architecture</p>
           <h2>在业务财务底座之上，构建可执行的 AI 能力层。</h2>
-          <p>以 Odoo 为业务财务底座，以 FT Agent 编排工作，以 LLM/RAG 接入知识，以 Policy/Audit 约束动作。</p>
+          <p>以 Sdoo 为业务财务底座，以 FT Agent 编排工作，以 LLM/RAG 接入知识，以 Policy/Audit 约束动作。</p>
         </div>
         <figure class="visual-frame">
           <img src="./assets/sudo-architecture.png" alt="SUDO AI-native 财务系统架构" />
@@ -132,9 +132,46 @@
       <section class="contact reveal" id="contact">
         <p class="eyebrow">Ready for global finance operations</p>
         <h2>让财务系统从记录过去，走向判断未来。</h2>
-        <a class="button primary" href="mailto:hello@sudo.finance">预约产品演示</a>
+        <a class="button primary demo-trigger" href="#demo-request">预约产品演示</a>
       </section>
     </main>
+
+    <div class="demo-modal" id="demo-request" aria-hidden="true">
+      <div class="demo-backdrop" data-demo-close></div>
+      <section class="demo-dialog" role="dialog" aria-modal="true" aria-labelledby="demo-title">
+        <button class="demo-close" type="button" aria-label="关闭预约表单" data-demo-close>×</button>
+        <p class="eyebrow">Book a product demo</p>
+        <h2 id="demo-title">预约产品演示</h2>
+        <p class="demo-intro">留下联系方式，我们会尽快与您沟通出海财务数智化需求。</p>
+        <form class="demo-form" id="demo-form" novalidate>
+          <label>
+            <span>姓名</span>
+            <input name="name" type="text" autocomplete="name" required />
+          </label>
+          <label>
+            <span>手机号</span>
+            <input name="phone" type="tel" autocomplete="tel" required />
+          </label>
+          <label class="demo-field-full">
+            <span>公司名称</span>
+            <input name="company" type="text" autocomplete="organization" required />
+          </label>
+          <label class="demo-field-full">
+            <span>需求备注</span>
+            <textarea name="message" rows="4" placeholder="例如：跨境电商、多主体合规、业财税一体化等"></textarea>
+          </label>
+          <p class="demo-form-status" id="demo-form-status" role="status" aria-live="polite"></p>
+          <button class="button primary demo-submit" type="submit">提交预约</button>
+        </form>
+        <div class="demo-success" id="demo-success" hidden>
+          <div class="demo-success-mark" aria-hidden="true">✓</div>
+          <p class="eyebrow">Request received</p>
+          <h2>预约成功</h2>
+          <p>我们已收到您的预约信息，会尽快与您联系。</p>
+          <button class="button primary" type="button" data-demo-close>知道了</button>
+        </div>
+      </section>
+    </div>
 
     <footer class="site-footer">
       <div class="footer-inner">

@@ -59,3 +59,115 @@ const observer = new IntersectionObserver(
 document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 setSlide(0);
 startAuto();
+
+const demoModal = document.querySelector("#demo-request");
+const demoForm = document.querySelector("#demo-form");
+const demoSuccess = document.querySelector("#demo-success");
+const demoStatus = document.querySelector("#demo-form-status");
+const demoTriggers = [...document.querySelectorAll(".demo-trigger")];
+const demoCloseTargets = [...document.querySelectorAll("[data-demo-close]")];
+let lastFocusedElement = null;
+
+function setDemoStatus(message, type = "") {
+  demoStatus.textContent = message;
+  demoStatus.dataset.type = type;
+}
+
+function showDemoForm() {
+  demoForm.hidden = false;
+  demoSuccess.hidden = true;
+  setDemoStatus("");
+}
+
+function showDemoSuccess() {
+  demoForm.hidden = true;
+  demoSuccess.hidden = false;
+  demoSuccess.querySelector("button").focus();
+}
+
+function openDemoModal(event) {
+  event.preventDefault();
+  lastFocusedElement = document.activeElement;
+  demoForm.reset();
+  showDemoForm();
+  demoModal.classList.add("open");
+  demoModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  demoForm.elements.name.focus();
+}
+
+function closeDemoModal() {
+  demoModal.classList.remove("open");
+  demoModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  demoForm.reset();
+  showDemoForm();
+
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+  }
+}
+
+function validateDemoForm(data) {
+  if (!data.name || !data.phone || !data.company) {
+    return "请填写姓名、手机号和公司名称";
+  }
+
+  if (!/^[+\d][\d\s-]{5,19}$/.test(data.phone)) {
+    return "请填写有效的手机号";
+  }
+
+  return "";
+}
+
+demoTriggers.forEach(trigger => trigger.addEventListener("click", openDemoModal));
+demoCloseTargets.forEach(target => target.addEventListener("click", closeDemoModal));
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && demoModal.classList.contains("open")) {
+    closeDemoModal();
+  }
+});
+
+demoForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const formData = new FormData(demoForm);
+  const payload = {
+    name: String(formData.get("name") || "").trim(),
+    phone: String(formData.get("phone") || "").trim(),
+    company: String(formData.get("company") || "").trim(),
+    message: String(formData.get("message") || "").trim(),
+  };
+  const error = validateDemoForm(payload);
+
+  if (error) {
+    setDemoStatus(error, "error");
+    return;
+  }
+
+  const submitButton = demoForm.querySelector(".demo-submit");
+  submitButton.disabled = true;
+  setDemoStatus("正在提交预约信息...");
+
+  try {
+    const response = await fetch("/api/demo-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      setDemoStatus(result.error || "提交失败，请稍后重试", "error");
+      return;
+    }
+
+    demoForm.reset();
+    showDemoSuccess();
+  } catch (error) {
+    setDemoStatus("网络异常，请稍后重试", "error");
+  } finally {
+    submitButton.disabled = false;
+  }
+});
