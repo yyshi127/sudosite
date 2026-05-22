@@ -134,9 +134,14 @@ function createCell(text, className = "") {
   return td;
 }
 
-function createVerificationCell(row) {
+function createTimeCell(row) {
   const td = document.createElement("td");
-  td.className = "admin-verify-cell";
+  td.className = "admin-time-cell admin-nowrap";
+
+  const time = document.createElement("span");
+  time.className = "admin-time-text";
+  time.textContent = formatTime(row.created_at);
+  td.appendChild(time);
 
   if (row.verified_at) {
     const stamp = document.createElement("span");
@@ -144,11 +149,6 @@ function createVerificationCell(row) {
     stamp.textContent = "已核实";
     stamp.title = `核实时间：${formatTime(row.verified_at)}`;
     td.appendChild(stamp);
-  } else {
-    const pending = document.createElement("span");
-    pending.className = "admin-unverified-label";
-    pending.textContent = "未核实";
-    td.appendChild(pending);
   }
 
   return td;
@@ -215,13 +215,12 @@ function renderRows(rows) {
     actionCell.appendChild(deleteButton);
 
     tr.appendChild(selectCell);
-    tr.appendChild(createCell(formatTime(row.created_at), "admin-nowrap"));
+    tr.appendChild(createTimeCell(row));
     tr.appendChild(createCell(row.name));
     tr.appendChild(createCell(row.phone, "admin-nowrap"));
     tr.appendChild(createCell(row.company));
     tr.appendChild(createCell(row.industry || "-"));
     tr.appendChild(createCell(row.message || "-"));
-    tr.appendChild(createVerificationCell(row));
     tr.appendChild(actionCell);
     tableBody.appendChild(tr);
   });

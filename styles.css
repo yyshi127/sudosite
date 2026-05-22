@@ -1083,7 +1083,7 @@ body[data-lang="en"] .qr-card span {
 
 .admin-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 1080px;
   border-collapse: collapse;
   color: var(--ink);
   font-size: 14px;
@@ -1135,39 +1135,42 @@ body[data-lang="en"] .qr-card span {
   white-space: nowrap;
 }
 
-.admin-verify-cell {
-  min-width: 98px;
+.admin-time-cell {
+  position: relative;
+  min-width: 156px;
+}
+
+.admin-time-text {
+  position: relative;
+  z-index: 1;
 }
 
 .admin-verified-stamp {
-  display: inline-flex;
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  left: 38px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 74px;
-  min-height: 32px;
-  padding: 0 12px;
+  min-width: 70px;
+  min-height: 28px;
+  padding: 0 10px;
   color: var(--brand-dark);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
   letter-spacing: 0.08em;
-  border: 2px solid rgba(18, 164, 137, 0.74);
+  border: 2px solid rgba(18, 164, 137, 0.66);
   border-radius: 999px;
   background:
-    linear-gradient(135deg, rgba(18, 164, 137, 0.12), rgba(255, 255, 255, 0.7)),
-    rgba(243, 251, 249, 0.92);
+    linear-gradient(135deg, rgba(18, 164, 137, 0.16), rgba(255, 255, 255, 0.38)),
+    rgba(232, 248, 244, 0.56);
   box-shadow:
-    0 10px 22px rgba(18, 164, 137, 0.1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.78);
+    0 8px 18px rgba(18, 164, 137, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.48);
+  opacity: 0.72;
   transform: rotate(-5deg);
-}
-
-.admin-unverified-label {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  color: #7a8b91;
-  font-size: 13px;
-  font-weight: 760;
+  pointer-events: none;
 }
 
 .admin-action-cell {
