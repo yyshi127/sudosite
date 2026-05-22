@@ -347,7 +347,7 @@ body[data-lang="en"] .micro-grid strong {
 }
 
 body[data-lang="en"] .switch-tab {
-  padding: 22px;
+  padding: 16px 18px;
 }
 
 body[data-lang="en"] .switch-tab strong {
@@ -435,17 +435,23 @@ body[data-lang="en"] .qr-card span {
 
 .switch-tabs {
   display: grid;
-  gap: 12px;
+  align-content: start;
+  gap: 10px;
 }
 
 .switch-tab {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
   width: 100%;
-  padding: 24px;
+  min-height: 86px;
+  padding: 16px 18px;
   color: var(--muted);
   text-align: left;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 18px;
+  border-radius: 14px;
   cursor: pointer;
   transition: 260ms ease;
 }
@@ -456,15 +462,23 @@ body[data-lang="en"] .qr-card span {
 }
 
 .switch-tab small {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
   color: var(--brand);
+  font-size: 22px;
   font-weight: 850;
+  line-height: 1;
+  border-radius: 50%;
+  background: rgba(18, 164, 137, 0.09);
 }
 
 .switch-tab strong {
-  margin-top: 12px;
+  margin-top: 0;
   color: var(--ink);
   font-size: 22px;
-  line-height: 1.32;
+  line-height: 1.25;
 }
 
 .switch-tab.active {
