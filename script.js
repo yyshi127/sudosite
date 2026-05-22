@@ -330,6 +330,7 @@ const otherIndustryField = document.querySelector(".demo-other-industry");
 const otherIndustryInput = demoForm.elements.industryOther;
 const demoTriggers = [...document.querySelectorAll(".demo-trigger")];
 const demoCloseTargets = [...document.querySelectorAll("[data-demo-close]")];
+const snapSections = [...document.querySelectorAll(".hero, #value, #architecture, #scenes, #switcher, #governance, #contact")];
 let active = 0;
 let timer;
 let captionFadeTimer;
@@ -337,6 +338,12 @@ let slideTransitionTimer;
 let slideInitialized = false;
 let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh";
 let lastFocusedElement = null;
+let snapLocked = false;
+let snapUnlockTimer = 0;
+const snapMediaQuery = window.matchMedia("(min-width: 900px)");
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const snapWheelThreshold = 40;
+const snapLockMs = 850;
 
 function getCopy(key) {
   return i18n[currentLanguage][key];
@@ -512,6 +519,63 @@ function validateDemoForm(data) {
   return "";
 }
 
+function canUseSectionSnap() {
+  return snapMediaQuery.matches && !reducedMotionQuery.matches && !demoModal.classList.contains("open");
+}
+
+function isInteractiveScrollTarget(target) {
+  return Boolean(target.closest("a, button, input, select, textarea, label, [role='dialog']"));
+}
+
+function getCurrentSnapIndex() {
+  const headerOffset = window.innerWidth <= 640 ? 68 : 76;
+  let nearestIndex = 0;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  snapSections.forEach((section, index) => {
+    const distance = Math.abs(section.getBoundingClientRect().top - headerOffset);
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = index;
+    }
+  });
+
+  return nearestIndex;
+}
+
+function releaseSnapLock() {
+  window.clearTimeout(snapUnlockTimer);
+  snapUnlockTimer = window.setTimeout(() => {
+    snapLocked = false;
+  }, snapLockMs);
+}
+
+function scrollToSnapSection(index) {
+  const target = snapSections[index];
+  if (!target) return;
+
+  snapLocked = true;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  releaseSnapLock();
+}
+
+function handleSectionWheel(event) {
+  if (!canUseSectionSnap() || isInteractiveScrollTarget(event.target)) return;
+  if (Math.abs(event.deltaY) < snapWheelThreshold) return;
+
+  if (snapLocked) return;
+
+  const direction = event.deltaY > 0 ? 1 : -1;
+  const currentIndex = getCurrentSnapIndex();
+  const targetIndex = Math.max(0, Math.min(snapSections.length - 1, currentIndex + direction));
+
+  if (targetIndex === currentIndex) return;
+
+  event.preventDefault();
+  scrollToSnapSection(targetIndex);
+}
+
 tabs.forEach((tab, index) => {
   tab.addEventListener("click", () => {
     setSlide(index);
@@ -539,6 +603,7 @@ const observer = new IntersectionObserver(
 );
 
 document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+window.addEventListener("wheel", handleSectionWheel, { passive: false });
 demoTriggers.forEach(trigger => trigger.addEventListener("click", openDemoModal));
 demoCloseTargets.forEach(target => target.addEventListener("click", closeDemoModal));
 industrySelect.addEventListener("change", updateOtherIndustryField);
