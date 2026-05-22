@@ -456,9 +456,9 @@ body[data-lang="en"] .qr-card span {
   overflow: hidden;
   cursor: pointer;
   transition:
-    border-color 420ms ease,
-    box-shadow 420ms ease,
-    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    border-color 760ms ease,
+    box-shadow 760ms ease,
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .switch-tab::before {
@@ -468,7 +468,7 @@ body[data-lang="en"] .qr-card span {
   z-index: 0;
   background: linear-gradient(135deg, rgba(18, 164, 137, 0.13), rgba(255, 255, 255, 0.92));
   opacity: 0;
-  transition: opacity 620ms ease;
+  transition: opacity 920ms ease;
 }
 
 .switch-tab.active::before {
@@ -493,7 +493,7 @@ body[data-lang="en"] .qr-card span {
   line-height: 1;
   border-radius: 50%;
   background: rgba(18, 164, 137, 0.09);
-  transition: background 420ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 760ms ease, transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .switch-tab strong {
