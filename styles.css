@@ -73,12 +73,62 @@ a {
   justify-self: center;
   justify-content: center;
   gap: 42px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
+}
+
+body[data-lang="zh"] .nav {
+  font-size: 17px;
+}
+
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 12px;
 }
 
 .header-cta {
   justify-self: end;
+}
+
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 74px;
+  min-height: 42px;
+  padding: 0 13px;
+  color: var(--heading-soft);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0;
+  border: 1px solid rgba(18, 164, 137, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 28px rgba(31, 78, 86, 0.055);
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.language-toggle:hover,
+.language-toggle:focus-visible {
+  color: var(--brand-deep);
+  border-color: rgba(18, 164, 137, 0.52);
+  box-shadow: 0 16px 32px rgba(18, 164, 137, 0.12);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.language-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .header-cta,
@@ -221,6 +271,91 @@ h2 em {
   font-size: 16px;
   line-height: 1.7;
   white-space: nowrap;
+}
+
+body[data-lang="en"] .nav {
+  gap: 34px;
+}
+
+body[data-lang="en"] h1 {
+  max-width: 1220px;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: clamp(34px, 4.1vw, 62px);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+body[data-lang="en"] h1 span,
+body[data-lang="en"] .hero-copy > p:not(.eyebrow),
+body[data-lang="en"] h2 {
+  white-space: normal;
+}
+
+body[data-lang="en"] h1 > span:first-child {
+  font-size: clamp(44px, 5.2vw, 76px);
+  line-height: 1;
+}
+
+body[data-lang="en"] h1 > span + span {
+  margin-top: 0.32em;
+  color: var(--heading-soft);
+  font-size: clamp(26px, 3vw, 43px);
+  line-height: 1.16;
+}
+
+body[data-lang="en"] h1 .hero-result {
+  display: block;
+  margin-top: 0.12em;
+  color: var(--heading);
+  white-space: nowrap;
+}
+
+body[data-lang="en"] .hero-copy {
+  max-width: 1120px;
+}
+
+body[data-lang="en"] .hero-copy > p:not(.eyebrow) {
+  max-width: 840px;
+  margin-top: 24px;
+  font-size: 17px;
+  line-height: 1.72;
+}
+
+body[data-lang="en"] h2 {
+  max-width: 980px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+body[data-lang="en"] #value h2 {
+  max-width: 1040px;
+  font-size: clamp(27px, 2.7vw, 40px);
+  white-space: normal;
+  text-wrap: balance;
+}
+
+body[data-lang="en"] .chapter-copy > p:not(.eyebrow) {
+  max-width: 860px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+body[data-lang="en"] .micro-grid strong {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+body[data-lang="en"] .switch-tab {
+  padding: 22px;
+}
+
+body[data-lang="en"] .switch-tab strong {
+  font-size: 20px;
+}
+
+body[data-lang="en"] .qr-card span {
+  display: none;
 }
 
 .hero-actions {
@@ -1263,6 +1398,10 @@ h2 em {
   .admin-password-form {
     grid-template-columns: 1fr;
   }
+
+  body[data-lang="en"] .header-actions {
+    gap: 10px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1274,10 +1413,32 @@ h2 em {
     width: 150px;
   }
 
+  .header-actions {
+    gap: 8px;
+  }
+
+  .language-toggle {
+    min-width: 42px;
+    min-height: 40px;
+    padding: 0 10px;
+  }
+
+  .language-toggle span {
+    display: none;
+  }
+
   .header-cta {
     min-height: 40px;
     padding: 0 14px;
     font-size: 13px;
+  }
+
+  body[data-lang="en"] .header-cta {
+    max-width: 92px;
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: 1.15;
+    text-align: center;
   }
 
   .hero {
@@ -1315,9 +1476,38 @@ h2 em {
     white-space: nowrap;
   }
 
+  body[data-lang="en"] h1 .hero-result {
+    white-space: normal;
+  }
+
+  body[data-lang="en"] h1 {
+    font-size: clamp(25px, 7.5vw, 34px);
+    line-height: 1.12;
+  }
+
+  body[data-lang="en"] h1 > span:first-child {
+    font-size: clamp(33px, 9.6vw, 43px);
+  }
+
+  body[data-lang="en"] h1 > span + span {
+    margin-top: 0.42em;
+    font-size: clamp(22px, 6.2vw, 30px);
+    line-height: 1.2;
+  }
+
+  body[data-lang="en"] .hero-copy > p:not(.eyebrow) {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.62;
+  }
+
   h2 {
     font-size: clamp(20px, 6.1vw, 30px);
     white-space: normal;
+  }
+
+  body[data-lang="en"] #value h2 {
+    font-size: clamp(20px, 5.6vw, 28px);
   }
 
   .hero-copy > p:not(.eyebrow) {

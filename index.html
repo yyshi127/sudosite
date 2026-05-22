@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -8,103 +8,160 @@
       name="description"
       content="数豆科技为出海企业构建 AI-native 财务数智化系统，让利润、现金流、风险和合规在全球经营网络中持续清晰。"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260521-3" />
+    <link rel="stylesheet" href="./styles.css?v=20260522-1" />
   </head>
-  <body>
+  <body data-lang="zh">
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="SUDO 数豆首页">
-        <img src="./assets/sudo-logo-gray-source.png" alt="SUDO 数豆科技" />
+      <a class="brand" href="#top" aria-label="SUDO 数豆首页" data-i18n-aria="brandHome">
+        <img
+          src="./assets/sudo-logo-gray-source.png"
+          data-i18n-src="brandLogo"
+          alt="SUDO 数豆科技"
+          data-i18n-alt="brandLogo"
+        />
       </a>
-      <nav class="nav" aria-label="主导航">
-        <a href="#value">出海价值</a>
-        <a href="#architecture">产品架构</a>
-        <a href="#scenes">出海场景</a>
-        <a href="#governance">安全治理</a>
+      <nav class="nav" aria-label="主导航" data-i18n-aria="mainNav">
+        <a href="#value" data-i18n="navValue">出海价值</a>
+        <a href="#architecture" data-i18n="navArchitecture">产品架构</a>
+        <a href="#scenes" data-i18n="navScenes">出海场景</a>
+        <a href="#governance" data-i18n="navGovernance">安全治理</a>
       </nav>
-      <a class="header-cta" href="#contact">联系我们</a>
+      <div class="header-actions">
+        <button
+          class="language-toggle"
+          id="language-toggle"
+          type="button"
+          aria-label="Switch to English"
+          data-i18n-aria="languageToggle"
+          title="Switch to English"
+          data-i18n-title="languageToggle"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M3 12h18"></path>
+            <path d="M12 3a13.2 13.2 0 0 1 0 18"></path>
+            <path d="M12 3a13.2 13.2 0 0 0 0 18"></path>
+          </svg>
+          <span data-lang-current>EN</span>
+        </button>
+        <a class="header-cta" href="#contact" data-i18n="headerContact">联系我们</a>
+      </div>
     </header>
 
     <main id="top">
       <section class="hero visual-chapter reveal">
         <div class="chapter-copy hero-copy">
-          <p class="eyebrow">AI-native finance for global operators</p>
+          <p class="eyebrow" data-i18n="heroEyebrow">AI-native finance for global operators</p>
           <h1>
-            <span>用 <em>AI</em> 重新定义财务</span>
-            <span>让<span class="tone-brand">企业出海</span><em class="hero-result"><span class="tone-ink">更</span>轻、<span class="tone-ink">更</span>快、<span class="tone-ink">更</span>稳</em></span>
+            <span data-i18n="heroTitleLine1">用 <em>AI</em> 重新定义财务</span>
+            <span data-i18n="heroTitleLine2">让<span class="tone-brand">企业出海</span><em class="hero-result"><span class="tone-ink">更</span>轻、<span class="tone-ink">更</span>快、<span class="tone-ink">更</span>稳</em></span>
           </h1>
-          <p>
+          <p data-i18n="heroBody">
             数豆科技致力于为中国出海企业提供一站式全球业财税合规数智化解决方案
           </p>
           <div class="hero-actions">
-            <a class="button primary demo-trigger" href="#demo-request">预约产品演示</a>
-            <a class="button secondary" href="#value">查看出海价值</a>
+            <a class="button primary demo-trigger" href="#demo-request" data-i18n="primaryCta">预约产品演示</a>
+            <a class="button secondary" href="#value" data-i18n="secondaryCta">查看出海价值</a>
           </div>
         </div>
       </section>
 
       <section class="visual-chapter reveal" id="value">
         <div class="chapter-copy">
-          <p class="eyebrow">Outbound value</p>
-          <h2>让出海经营的利润、现金流与风险持续清晰。</h2>
-          <p>利润、现金流、风险和合规不再分散在系统外，而是在同一个 AI 财务网络里被理解、预测和治理。</p>
+          <p class="eyebrow" data-i18n="valueEyebrow">Outbound value</p>
+          <h2 data-i18n="valueTitle">让出海经营的利润、现金流与风险持续清晰。</h2>
+          <p data-i18n="valueBody">利润、现金流、风险和合规不再分散在系统外，而是在同一个 AI 财务网络里被理解、预测和治理。</p>
         </div>
         <figure class="visual-frame">
-          <img src="./assets/sudo-global-value.png" alt="出海企业业务数据汇入 AI 财务中枢" />
+          <img
+            src="./assets/sudo-global-value.png"
+            data-i18n-src="valueImage"
+            alt="出海企业业务数据汇入 AI 财务中枢"
+            data-i18n-alt="valueImage"
+          />
         </figure>
         <div class="micro-grid">
-          <article><strong>全球利润</strong><span>穿透 SKU、店铺、平台、国家和主体维度。</span></article>
-          <article><strong>跨境现金流</strong><span>连接回款、付款、库存占资、税费和汇率波动。</span></article>
-          <article><strong>经营风险</strong><span>把异常识别从事后分析前移到连续监测。</span></article>
+          <article><strong data-i18n="valueCard1Title">全球利润</strong><span data-i18n="valueCard1Body">穿透 SKU、店铺、平台、国家和主体维度。</span></article>
+          <article><strong data-i18n="valueCard2Title">跨境现金流</strong><span data-i18n="valueCard2Body">连接回款、付款、库存占资、税费和汇率波动。</span></article>
+          <article><strong data-i18n="valueCard3Title">经营风险</strong><span data-i18n="valueCard3Body">把异常识别从事后分析前移到连续监测。</span></article>
         </div>
       </section>
 
       <section class="visual-chapter reveal" id="architecture">
         <div class="chapter-copy">
-          <p class="eyebrow">Architecture</p>
-          <h2>在业务财务底座之上，构建可执行的 AI 能力层。</h2>
-          <p>以 Sdoo 为业务财务底座，以 FT Agent 编排工作，以 LLM/RAG 接入知识，以 Policy/Audit 约束动作。</p>
+          <p class="eyebrow" data-i18n="architectureEyebrow">Architecture</p>
+          <h2 data-i18n="architectureTitle">在业务财务底座之上，构建可执行的 AI 能力层。</h2>
+          <p data-i18n="architectureBody">以 Sdoo 为业务财务底座，以 FT Agent 编排工作，以 LLM/RAG 接入知识，以 Policy/Audit 约束动作。</p>
         </div>
         <figure class="visual-frame">
-          <img src="./assets/sudo-architecture.png" alt="SUDO AI-native 财务系统架构" />
+          <img
+            src="./assets/sudo-architecture.png"
+            data-i18n-src="architectureImage"
+            alt="SUDO AI-native 财务系统架构"
+            data-i18n-alt="architectureImage"
+          />
         </figure>
       </section>
 
       <section class="visual-chapter reveal" id="scenes">
         <div class="chapter-copy">
-          <p class="eyebrow">Global scenarios</p>
-          <h2>面向跨境电商、品牌出海与多主体经营的真实场景。</h2>
-          <p>跨境电商、品牌出海、多主体经营、海外团队协同，都需要同一套可解释、可执行、可审计的财务智能。</p>
+          <p class="eyebrow" data-i18n="scenesEyebrow">Global scenarios</p>
+          <h2 data-i18n="scenesTitle">面向跨境电商、品牌出海与多主体经营的真实场景。</h2>
+          <p data-i18n="scenesBody">跨境电商、品牌出海、多主体经营、海外团队协同，都需要同一套可解释、可执行、可审计的财务智能。</p>
         </div>
         <figure class="visual-frame">
-          <img src="./assets/sudo-scenarios.png" alt="SUDO 出海企业财务场景网络" />
+          <img
+            src="./assets/sudo-scenarios.png"
+            data-i18n-src="scenesImage"
+            alt="SUDO 出海企业财务场景网络"
+            data-i18n-alt="scenesImage"
+          />
         </figure>
       </section>
 
       <section class="visual-chapter switcher-chapter reveal" id="switcher">
         <div class="chapter-copy">
-          <p class="eyebrow">Operating loop</p>
-          <h2>把分散的出海数据转化为 CFO 可以行动的判断。</h2>
-          <p>切换查看从数据连接、Agent 执行到审计闭环的完整路径。</p>
+          <p class="eyebrow" data-i18n="switcherEyebrow">Operating loop</p>
+          <h2 data-i18n="switcherTitle">把分散的出海数据转化为 CFO 可以行动的判断。</h2>
+          <p data-i18n="switcherBody">切换查看从数据连接、Agent 执行到审计闭环的完整路径。</p>
         </div>
         <div class="switcher">
-          <div class="switch-tabs" role="tablist" aria-label="产品能力切换">
+          <div class="switch-tabs" role="tablist" aria-label="产品能力切换" data-i18n-aria="switchTabs">
             <button class="switch-tab active" type="button" data-slide="0">
-              <small>01</small><strong>连接全球经营数据</strong>
+              <small>01</small><strong data-i18n="slide0Title">连接全球经营数据</strong>
             </button>
             <button class="switch-tab" type="button" data-slide="1">
-              <small>02</small><strong>让 Agent 执行财务工作</strong>
+              <small>02</small><strong data-i18n="slide1Title">让 Agent 执行财务工作</strong>
             </button>
             <button class="switch-tab" type="button" data-slide="2">
-              <small>03</small><strong>形成可审计决策闭环</strong>
+              <small>03</small><strong data-i18n="slide2Title">形成可审计决策闭环</strong>
             </button>
           </div>
           <div class="switch-stage" aria-live="polite">
             <div class="stage-progress"><span></span></div>
-            <img class="stage-img active" src="./assets/sudo-workflow.png" alt="出海财务 AI 工作流" />
-            <img class="stage-img" src="./assets/sudo-agent-chat.png" alt="AI Agent 执行财务工作" />
-            <img class="stage-img" src="./assets/sudo-audit-timeline.png" alt="AI 财务审计证据链" />
+            <img
+              class="stage-img active"
+              src="./assets/sudo-workflow.png"
+              data-i18n-src="workflowImage"
+              alt="出海财务 AI 工作流"
+              data-i18n-alt="workflowImage"
+            />
+            <img
+              class="stage-img"
+              src="./assets/sudo-agent-chat.png"
+              data-i18n-src="agentImage"
+              alt="AI Agent 执行财务工作"
+              data-i18n-alt="agentImage"
+            />
+            <img
+              class="stage-img"
+              src="./assets/sudo-audit-timeline.png"
+              data-i18n-src="auditImage"
+              alt="AI 财务审计证据链"
+              data-i18n-alt="auditImage"
+            />
             <div class="stage-caption">
-              <p class="stage-label">当前能力</p>
+              <p class="stage-label" data-i18n="stageLabel">当前能力</p>
               <h3>连接全球经营数据</h3>
               <p>从业务发生到财务判断，减少系统外 Excel、人工解释和事后补救。</p>
             </div>
@@ -114,83 +171,93 @@
 
       <section class="visual-chapter reveal" id="governance">
         <div class="chapter-copy">
-          <p class="eyebrow">Governed AI</p>
-          <h2>让 AI 参与财务工作，同时保持可控、可解释、可审计。</h2>
-          <p>从流程提效开始，到风险前移，再到经营赋能。每一次 AI 判断、引用、动作和人工确认都留下证据。</p>
+          <p class="eyebrow" data-i18n="governanceEyebrow">Governed AI</p>
+          <h2 data-i18n="governanceTitle">让 AI 参与财务工作，同时保持可控、可解释、可审计。</h2>
+          <p data-i18n="governanceBody">从流程提效开始，到风险前移，再到经营赋能。每一次 AI 判断、引用、动作和人工确认都留下证据。</p>
         </div>
         <figure class="visual-frame">
-          <img src="./assets/sudo-governance-path.png" alt="SUDO AI 财务治理与落地路径" />
+          <img
+            src="./assets/sudo-governance-path.png"
+            data-i18n-src="governanceImage"
+            alt="SUDO AI 财务治理与落地路径"
+            data-i18n-alt="governanceImage"
+          />
         </figure>
         <div class="micro-grid four">
-          <article><strong>数据分级</strong><span>不同角色只访问必要数据。</span></article>
-          <article><strong>模型解耦</strong><span>企业数据通过受控边界进入模型。</span></article>
-          <article><strong>审计留痕</strong><span>判断、引用、动作全链路可回放。</span></article>
-          <article><strong>人在环审批</strong><span>高风险财务动作不越权执行。</span></article>
+          <article><strong data-i18n="governanceCard1Title">数据分级</strong><span data-i18n="governanceCard1Body">不同角色只访问必要数据。</span></article>
+          <article><strong data-i18n="governanceCard2Title">模型解耦</strong><span data-i18n="governanceCard2Body">企业数据通过受控边界进入模型。</span></article>
+          <article><strong data-i18n="governanceCard3Title">审计留痕</strong><span data-i18n="governanceCard3Body">判断、引用、动作全链路可回放。</span></article>
+          <article><strong data-i18n="governanceCard4Title">人在环审批</strong><span data-i18n="governanceCard4Body">高风险财务动作不越权执行。</span></article>
         </div>
       </section>
 
       <section class="contact reveal" id="contact">
-        <p class="eyebrow">Ready for global finance operations</p>
-        <h2>让财务系统从记录过去，走向判断未来。</h2>
-        <a class="button primary demo-trigger" href="#demo-request">预约产品演示</a>
+        <p class="eyebrow" data-i18n="contactEyebrow">Ready for global finance operations</p>
+        <h2 data-i18n="contactTitle">让财务系统从记录过去，走向判断未来。</h2>
+        <a class="button primary demo-trigger" href="#demo-request" data-i18n="primaryCta">预约产品演示</a>
       </section>
     </main>
 
     <div class="demo-modal" id="demo-request" aria-hidden="true">
       <div class="demo-backdrop" data-demo-close></div>
       <section class="demo-dialog" role="dialog" aria-modal="true" aria-labelledby="demo-title">
-        <button class="demo-close" type="button" aria-label="关闭预约表单" data-demo-close>×</button>
-        <p class="eyebrow">Book a product demo</p>
-        <h2 id="demo-title">预约产品演示</h2>
-        <p class="demo-intro">留下联系方式，我们会尽快与您沟通出海财务数智化需求。</p>
+        <button class="demo-close" type="button" aria-label="关闭预约表单" data-demo-close data-i18n-aria="demoClose">×</button>
+        <p class="eyebrow" data-i18n="demoEyebrow">Book a product demo</p>
+        <h2 id="demo-title" data-i18n="demoTitle">预约产品演示</h2>
+        <p class="demo-intro" data-i18n="demoIntro">留下联系方式，我们会尽快与您沟通出海财务数智化需求。</p>
         <form class="demo-form" id="demo-form" novalidate>
           <label>
-            <span>姓名</span>
+            <span data-i18n="fieldName">姓名</span>
             <input name="name" type="text" autocomplete="name" required />
           </label>
           <label>
-            <span>手机号</span>
+            <span data-i18n="fieldPhone">手机号</span>
             <input name="phone" type="tel" autocomplete="tel" required />
           </label>
           <label class="demo-field-full">
-            <span>公司名称</span>
+            <span data-i18n="fieldCompany">公司名称</span>
             <input name="company" type="text" autocomplete="organization" required />
           </label>
           <label class="demo-field-full">
-            <span>所属行业</span>
+            <span data-i18n="fieldIndustry">所属行业</span>
             <select name="industry" required>
-              <option value="">请选择所属行业</option>
-              <option value="跨境电商">跨境电商</option>
-              <option value="海外制造业">海外制造业</option>
-              <option value="供应链">供应链</option>
-              <option value="海外仓储">海外仓储</option>
-              <option value="物流中心">物流中心</option>
-              <option value="海外项目型公司">海外项目型公司</option>
-              <option value="国际工程">国际工程</option>
-              <option value="国际贸易">国际贸易</option>
-              <option value="国际服务">国际服务</option>
-              <option value="会计事务所">会计事务所</option>
-              <option value="财税服务商">财税服务商</option>
-              <option value="其它行业">其它行业</option>
+              <option value="" data-i18n="industryPlaceholder">请选择所属行业</option>
+              <option value="跨境电商" data-i18n="industryCrossBorderEcommerce">跨境电商</option>
+              <option value="海外制造业" data-i18n="industryManufacturing">海外制造业</option>
+              <option value="供应链" data-i18n="industrySupplyChain">供应链</option>
+              <option value="海外仓储" data-i18n="industryWarehousing">海外仓储</option>
+              <option value="物流中心" data-i18n="industryLogistics">物流中心</option>
+              <option value="海外项目型公司" data-i18n="industryProjectCompany">海外项目型公司</option>
+              <option value="国际工程" data-i18n="industryEngineering">国际工程</option>
+              <option value="国际贸易" data-i18n="industryTrade">国际贸易</option>
+              <option value="国际服务" data-i18n="industryServices">国际服务</option>
+              <option value="会计事务所" data-i18n="industryAccountingFirm">会计事务所</option>
+              <option value="财税服务商" data-i18n="industryTaxProvider">财税服务商</option>
+              <option value="其它行业" data-i18n="industryOther">其它行业</option>
             </select>
           </label>
           <label class="demo-field-full demo-other-industry" hidden>
-            <span>请输入所属行业</span>
+            <span data-i18n="fieldIndustryOther">请输入所属行业</span>
             <input name="industryOther" type="text" autocomplete="organization-title" />
           </label>
           <label class="demo-field-full">
-            <span>需求备注</span>
-            <textarea name="message" rows="4" placeholder="例如：跨境电商、多主体合规、业财税一体化等"></textarea>
+            <span data-i18n="fieldMessage">需求备注</span>
+            <textarea
+              name="message"
+              rows="4"
+              placeholder="例如：跨境电商、多主体合规、业财税一体化等"
+              data-i18n-placeholder="fieldMessagePlaceholder"
+            ></textarea>
           </label>
           <p class="demo-form-status" id="demo-form-status" role="status" aria-live="polite"></p>
-          <button class="button primary demo-submit" type="submit">提交预约</button>
+          <button class="button primary demo-submit" type="submit" data-i18n="demoSubmit">提交预约</button>
         </form>
         <div class="demo-success" id="demo-success" hidden>
           <div class="demo-success-mark" aria-hidden="true">✓</div>
-          <p class="eyebrow">Request received</p>
-          <h2>预约成功</h2>
-          <p>我们已收到您的预约信息，会尽快与您联系。</p>
-          <button class="button primary" type="button" data-demo-close>知道了</button>
+          <p class="eyebrow" data-i18n="successEyebrow">Request received</p>
+          <h2 data-i18n="successTitle">预约成功</h2>
+          <p data-i18n="successBody">我们已收到您的预约信息，会尽快与您联系。</p>
+          <button class="button primary" type="button" data-demo-close data-i18n="successClose">知道了</button>
         </div>
       </section>
     </div>
@@ -198,36 +265,51 @@
     <footer class="site-footer">
       <div class="footer-inner">
         <div class="footer-brand">
-          <strong>SUDO 数豆科技</strong>
+          <strong data-i18n="footerBrand">SUDO 数豆科技</strong>
           <span>
             <a href="tel:051265001666">0512-65001666</a>
             <a href="mailto:hello@sudo.finance">hello@sudo.finance</a>
           </span>
-          <span>苏州工业园区万盛街8号圆融大厦1707</span>
+          <span data-i18n="footerAddress">苏州工业园区万盛街8号圆融大厦1707</span>
           <span class="footer-links">
-            <a href="#">隐私政策</a>
-            <a href="#">服务条款</a>
-            <span>ICP备案中...</span>
+            <a href="#" data-i18n="footerPrivacy">隐私政策</a>
+            <a href="#" data-i18n="footerTerms">服务条款</a>
+            <span data-i18n="footerIcp">ICP备案中...</span>
           </span>
-          <p>© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</p>
+          <p data-i18n="footerCopyright">© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</p>
         </div>
-        <div class="footer-channels" aria-label="官方账号二维码">
+        <div class="footer-channels" aria-label="官方账号二维码" data-i18n-aria="footerChannels">
           <div class="qr-card">
-            <img src="./assets/sudo-wechat-service.jpg" alt="数豆科技服务号二维码" />
-            <span>服务号</span>
+            <img
+              src="./assets/sudo-wechat-service.jpg"
+              data-i18n-src="wechatImage"
+              alt="数豆科技服务号二维码"
+              data-i18n-alt="wechatImage"
+            />
+            <span data-i18n="wechatLabel">服务号</span>
           </div>
           <div class="qr-card">
-            <img src="./assets/sudo-video-channel.png" alt="数豆科技视频号二维码" />
-            <span>视频号</span>
+            <img
+              src="./assets/sudo-video-channel.png"
+              data-i18n-src="videoImage"
+              alt="数豆科技视频号二维码"
+              data-i18n-alt="videoImage"
+            />
+            <span data-i18n="videoLabel">视频号</span>
           </div>
           <div class="qr-card">
-            <img src="./assets/ruihua-cloud-qr.png" alt="瑞华云二维码" />
-            <span>瑞华云</span>
+            <img
+              src="./assets/ruihua-cloud-qr.png"
+              data-i18n-src="ruihuaImage"
+              alt="瑞华云二维码"
+              data-i18n-alt="ruihuaImage"
+            />
+            <span data-i18n="ruihuaLabel">瑞华云</span>
           </div>
         </div>
       </div>
     </footer>
 
-    <script src="./script.js?v=20260521-3"></script>
+    <script src="./script.js?v=20260522-1"></script>
   </body>
 </html>
