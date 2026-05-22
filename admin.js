@@ -22,7 +22,9 @@ const bulkDeleteButton = document.querySelector("#admin-bulk-delete");
 const refreshButton = document.querySelector("#admin-refresh");
 const logoutButton = document.querySelector("#admin-logout");
 const csvExportLink = document.querySelector('a[href="/api/admin/demo-requests.csv"]');
+const filterButtons = [...document.querySelectorAll(".admin-filter-button")];
 let currentRows = [];
+let currentFilter = "all";
 let selectedIds = new Set();
 let pendingDeleteIds = [];
 let adminSessionTimer = 0;
@@ -87,15 +89,28 @@ function formatTime(value) {
 }
 
 function getSelectedRows() {
-  return currentRows.filter(row => selectedIds.has(row.id));
+  return getFilteredRows().filter(row => selectedIds.has(row.id));
+}
+
+function getFilteredRows() {
+  if (currentFilter === "verified") {
+    return currentRows.filter(row => row.verified_at);
+  }
+
+  if (currentFilter === "unverified") {
+    return currentRows.filter(row => !row.verified_at);
+  }
+
+  return currentRows;
 }
 
 function updateSelectionState() {
   const selectedCount = selectedIds.size;
   bulkDeleteButton.disabled = selectedCount === 0;
   bulkDeleteButton.textContent = selectedCount ? `删除选中（${selectedCount}）` : "删除选中";
-  selectAllCheckbox.checked = currentRows.length > 0 && selectedCount === currentRows.length;
-  selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < currentRows.length;
+  const visibleRows = getFilteredRows();
+  selectAllCheckbox.checked = visibleRows.length > 0 && selectedCount === visibleRows.length;
+  selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < visibleRows.length;
 }
 
 function createCell(text, className = "") {
@@ -105,16 +120,47 @@ function createCell(text, className = "") {
   return td;
 }
 
-function renderRows(rows) {
-  currentRows = rows;
-  selectedIds = new Set([...selectedIds].filter(id => rows.some(row => row.id === id)));
-  tableBody.innerHTML = "";
-  countLabel.textContent = `${rows.length} 条记录`;
-  emptyState.hidden = rows.length > 0;
+function createVerificationCell(row) {
+  const td = document.createElement("td");
+  td.className = "admin-verify-cell";
 
-  rows.forEach(row => {
+  if (row.verified_at) {
+    const stamp = document.createElement("span");
+    stamp.className = "admin-verified-stamp";
+    stamp.textContent = "已核实";
+    stamp.title = `核实时间：${formatTime(row.verified_at)}`;
+    td.appendChild(stamp);
+  } else {
+    const pending = document.createElement("span");
+    pending.className = "admin-unverified-label";
+    pending.textContent = "未核实";
+    td.appendChild(pending);
+  }
+
+  return td;
+}
+
+function updateFilterButtons() {
+  filterButtons.forEach(button => {
+    button.classList.toggle("active", button.dataset.filter === currentFilter);
+  });
+}
+
+function renderRows(rows) {
+  if (rows) {
+    currentRows = rows;
+  }
+
+  const visibleRows = getFilteredRows();
+  selectedIds = new Set([...selectedIds].filter(id => visibleRows.some(row => row.id === id)));
+  tableBody.innerHTML = "";
+  countLabel.textContent = `${visibleRows.length} / ${currentRows.length} 条记录`;
+  emptyState.hidden = visibleRows.length > 0;
+
+  visibleRows.forEach(row => {
     const tr = document.createElement("tr");
     tr.dataset.id = row.id;
+    tr.classList.toggle("admin-row-verified", Boolean(row.verified_at));
 
     const selectCell = document.createElement("td");
     selectCell.className = "admin-select-cell";
@@ -127,6 +173,16 @@ function renderRows(rows) {
     selectCell.appendChild(checkbox);
 
     const actionCell = document.createElement("td");
+    actionCell.className = "admin-action-cell";
+    const verifyButton = document.createElement("button");
+    verifyButton.className = "admin-table-verify";
+    verifyButton.type = "button";
+    verifyButton.dataset.id = row.id;
+    verifyButton.dataset.verified = row.verified_at ? "true" : "false";
+    verifyButton.textContent = row.verified_at ? "取消核实" : "核实";
+    verifyButton.setAttribute("aria-label", `${row.verified_at ? "取消核实" : "核实"} ${row.name} 的预约记录`);
+    actionCell.appendChild(verifyButton);
+
     const deleteButton = document.createElement("button");
     deleteButton.className = "admin-table-delete";
     deleteButton.type = "button";
@@ -151,11 +207,20 @@ function renderRows(rows) {
     tr.appendChild(createCell(row.company));
     tr.appendChild(createCell(row.industry || "-"));
     tr.appendChild(createCell(row.message || "-"));
+    tr.appendChild(createVerificationCell(row));
     tr.appendChild(actionCell);
     tableBody.appendChild(tr);
   });
 
+  updateFilterButtons();
   updateSelectionState();
+}
+
+function updateRowVerification(id, verifiedAt) {
+  currentRows = currentRows.map(row => (
+    row.id === id ? { ...row, verified_at: verifiedAt } : row
+  ));
+  renderRows();
 }
 
 function openSettings() {
@@ -245,6 +310,40 @@ async function loadRequests() {
   setStatus(dashboardStatus, "");
 }
 
+async function updateVerification(button) {
+  const id = Number(button.dataset.id);
+  const willVerify = button.dataset.verified !== "true";
+
+  button.disabled = true;
+  setStatus(dashboardStatus, willVerify ? "正在标记已核实..." : "正在取消核实...");
+
+  try {
+    const response = await fetch(`/api/admin/demo-requests/${id}/verification`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ verified: willVerify }),
+    });
+    const result = await response.json();
+
+    if (handleAuthExpired(response)) {
+      return;
+    }
+
+    if (!response.ok || !result.ok) {
+      setStatus(dashboardStatus, result.error || "核实状态更新失败，请稍后重试", "error");
+      return;
+    }
+
+    updateRowVerification(result.id, result.verified_at);
+    setStatus(dashboardStatus, willVerify ? "已标记为已核实" : "已取消核实", "success");
+  } catch (error) {
+    setStatus(dashboardStatus, "网络异常，请稍后重试", "error");
+  } finally {
+    button.disabled = false;
+  }
+}
+
 loginForm.addEventListener("submit", async event => {
   event.preventDefault();
   const formData = new FormData(loginForm);
@@ -298,8 +397,8 @@ document.addEventListener("keydown", event => {
 });
 
 selectAllCheckbox.addEventListener("change", () => {
-  selectedIds = selectAllCheckbox.checked ? new Set(currentRows.map(row => row.id)) : new Set();
-  renderRows(currentRows);
+  selectedIds = selectAllCheckbox.checked ? new Set(getFilteredRows().map(row => row.id)) : new Set();
+  renderRows();
 });
 
 tableBody.addEventListener("change", event => {
@@ -316,6 +415,12 @@ tableBody.addEventListener("change", event => {
 });
 
 tableBody.addEventListener("click", event => {
+  const verifyButton = event.target.closest(".admin-table-verify");
+  if (verifyButton) {
+    updateVerification(verifyButton);
+    return;
+  }
+
   const button = event.target.closest(".admin-table-delete");
   if (!button) return;
 
@@ -324,6 +429,14 @@ tableBody.addEventListener("click", event => {
   if (row) {
     openDeleteModal([row]);
   }
+});
+
+filterButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
+    selectedIds = new Set();
+    renderRows();
+  });
 });
 
 bulkDeleteButton.addEventListener("click", () => {

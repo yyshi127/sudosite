@@ -53,6 +53,10 @@ if (!demoColumns.includes("industry")) {
   db.prepare("ALTER TABLE demo_requests ADD COLUMN industry TEXT NOT NULL DEFAULT ''").run();
 }
 
+if (!demoColumns.includes("verified_at")) {
+  db.prepare("ALTER TABLE demo_requests ADD COLUMN verified_at TEXT DEFAULT NULL").run();
+}
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
   const hash = crypto.pbkdf2Sync(password, salt, 120000, 32, "sha256").toString("hex");
@@ -284,13 +288,43 @@ app.get("/api/admin/demo-requests", requireAdmin, (req, res) => {
   res.setHeader("Cache-Control", "no-store");
 
   const rows = db.prepare(`
-    SELECT id, name, phone, company, industry, message, created_at
+    SELECT id, name, phone, company, industry, message, verified_at, created_at
     FROM demo_requests
     WHERE deleted_at IS NULL
     ORDER BY datetime(created_at) DESC, id DESC
   `).all();
 
   res.json({ ok: true, rows });
+});
+
+app.patch("/api/admin/demo-requests/:id/verification", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const verified = req.body && req.body.verified;
+
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(400).json({ ok: false, error: "记录 ID 无效" });
+    return;
+  }
+
+  if (typeof verified !== "boolean") {
+    res.status(400).json({ ok: false, error: "核实状态无效" });
+    return;
+  }
+
+  const verifiedAt = verified ? db.prepare("SELECT datetime('now', 'localtime') AS value").get().value : null;
+  const result = db.prepare(`
+    UPDATE demo_requests
+    SET verified_at = @verifiedAt
+    WHERE deleted_at IS NULL
+      AND id = @id
+  `).run({ id, verifiedAt });
+
+  if (!result.changes) {
+    res.status(404).json({ ok: false, error: "记录不存在或已删除" });
+    return;
+  }
+
+  res.json({ ok: true, id, verified_at: verifiedAt });
 });
 
 app.post("/api/admin/demo-requests/bulk-delete", requireAdmin, (req, res) => {
@@ -333,12 +367,12 @@ app.get("/api/admin/demo-requests.csv", requireAdmin, (req, res) => {
   res.setHeader("Cache-Control", "no-store");
 
   const rows = db.prepare(`
-    SELECT id, name, phone, company, industry, message, created_at
+    SELECT id, name, phone, company, industry, message, verified_at, created_at
     FROM demo_requests
     WHERE deleted_at IS NULL
     ORDER BY datetime(created_at) DESC, id DESC
   `).all();
-  const header = ["ID", "提交时间", "姓名", "手机号", "公司名称", "所属行业", "需求备注"];
+  const header = ["ID", "提交时间", "姓名", "手机号", "公司名称", "所属行业", "需求备注", "核实状态", "核实时间"];
   const body = rows.map(row => [
     row.id,
     row.created_at,
@@ -347,6 +381,8 @@ app.get("/api/admin/demo-requests.csv", requireAdmin, (req, res) => {
     row.company,
     row.industry,
     row.message,
+    row.verified_at ? "已核实" : "未核实",
+    row.verified_at || "",
   ].map(csvEscape).join(","));
 
   res.setHeader("Content-Type", "text/csv; charset=utf-8");

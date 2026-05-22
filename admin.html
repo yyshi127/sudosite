@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUDO 数豆｜预约演示后台</title>
-    <link rel="stylesheet" href="./styles.css?v=20260521-2" />
-    <script src="./admin.js?v=20260521-8" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260522-3" />
+    <script src="./admin.js?v=20260522-1" defer></script>
   </head>
   <body class="admin-page">
     <header class="admin-header">
@@ -52,6 +52,11 @@
           </div>
           <div class="admin-actions">
             <span class="admin-count" id="admin-count">0 条记录</span>
+            <div class="admin-filter" role="group" aria-label="核实状态筛选">
+              <button class="admin-filter-button active" type="button" data-filter="all">全部</button>
+              <button class="admin-filter-button" type="button" data-filter="verified">已核实</button>
+              <button class="admin-filter-button" type="button" data-filter="unverified">未核实</button>
+            </div>
             <button class="button secondary" id="admin-refresh" type="button">刷新</button>
             <button class="button secondary admin-bulk-delete" id="admin-bulk-delete" type="button" disabled>删除选中</button>
             <a class="button secondary" href="/api/admin/demo-requests.csv">导出 CSV</a>
@@ -71,6 +76,7 @@
                 <th>公司名称</th>
                 <th>所属行业</th>
                 <th>需求备注</th>
+                <th>核实状态</th>
                 <th>操作</th>
               </tr>
             </thead>
