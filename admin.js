@@ -88,6 +88,20 @@ function formatTime(value) {
   return value.replace("T", " ").replace(/\.\d+Z$/, "");
 }
 
+async function readJsonResponse(response, fallbackMessage) {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (!contentType.includes("application/json")) {
+    return { ok: false, error: fallbackMessage };
+  }
+
+  try {
+    return await response.json();
+  } catch (error) {
+    return { ok: false, error: fallbackMessage };
+  }
+}
+
 function getSelectedRows() {
   return getFilteredRows().filter(row => selectedIds.has(row.id));
 }
@@ -324,11 +338,12 @@ async function updateVerification(button) {
       credentials: "same-origin",
       body: JSON.stringify({ verified: willVerify }),
     });
-    const result = await response.json();
 
     if (handleAuthExpired(response)) {
       return;
     }
+
+    const result = await readJsonResponse(response, "核实接口不可用，请确认后台服务已更新并重启");
 
     if (!response.ok || !result.ok) {
       setStatus(dashboardStatus, result.error || "核实状态更新失败，请稍后重试", "error");
