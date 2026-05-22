@@ -12,8 +12,6 @@ const i18n = {
     navArchitecture: "产品架构",
     navScenes: "出海场景",
     navGovernance: "安全治理",
-    languageToggle: "Switch to English",
-    languageIndicator: "EN",
     headerContact: "联系我们",
     heroEyebrow: "AI-native finance for global operators",
     heroTitleLine1: "用 <em>AI</em> 重新定义财务",
@@ -169,8 +167,6 @@ const i18n = {
     navArchitecture: "Architecture",
     navScenes: "Use Cases",
     navGovernance: "Governance",
-    languageToggle: "切换到中文",
-    languageIndicator: "CN",
     headerContact: "Contact Us",
     heroEyebrow: "AI-native finance for global operators",
     heroTitleLine1: "Redefine Finance with <em>AI</em>",
@@ -316,7 +312,7 @@ const i18n = {
 };
 
 const languageToggle = document.querySelector("#language-toggle");
-const languageIndicator = document.querySelector("[data-lang-current]");
+const languageOptions = [...document.querySelectorAll("[data-lang-option]")];
 const descriptionMeta = document.querySelector('meta[name="description"]');
 const tabs = [...document.querySelectorAll(".switch-tab")];
 const images = [...document.querySelectorAll(".stage-img")];
@@ -360,7 +356,11 @@ function applyLanguage(language) {
   document.body.dataset.lang = currentLanguage;
   document.title = dictionary.metaTitle;
   descriptionMeta.setAttribute("content", dictionary.metaDescription);
-  languageIndicator.textContent = dictionary.languageIndicator;
+  languageOptions.forEach(option => {
+    const isActive = option.dataset.langOption === currentLanguage;
+    option.classList.toggle("active", isActive);
+    option.setAttribute("aria-pressed", String(isActive));
+  });
   localStorage.setItem("sudoLanguage", currentLanguage);
 
   document.querySelectorAll("[data-i18n]").forEach(element => {
@@ -519,8 +519,11 @@ tabs.forEach((tab, index) => {
   });
 });
 
-languageToggle.addEventListener("click", () => {
-  applyLanguage(currentLanguage === "zh" ? "en" : "zh");
+languageToggle.addEventListener("click", event => {
+  const option = event.target.closest("[data-lang-option]");
+  if (!option) return;
+
+  applyLanguage(option.dataset.langOption);
 });
 
 const observer = new IntersectionObserver(

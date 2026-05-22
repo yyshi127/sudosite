@@ -96,39 +96,55 @@ body[data-lang="zh"] .nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-width: 74px;
+  gap: 6px;
   min-height: 42px;
-  padding: 0 13px;
-  color: var(--heading-soft);
-  font-size: 12px;
+  padding: 0 10px;
+  color: #6d7f83;
+  font-size: 13px;
   font-weight: 850;
   letter-spacing: 0;
   border: 1px solid rgba(18, 164, 137, 0.2);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 12px 28px rgba(31, 78, 86, 0.055);
-  cursor: pointer;
   transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .language-toggle:hover,
-.language-toggle:focus-visible {
-  color: var(--brand-deep);
+.language-toggle:focus-within {
   border-color: rgba(18, 164, 137, 0.52);
   box-shadow: 0 16px 32px rgba(18, 164, 137, 0.12);
-  outline: none;
   transform: translateY(-1px);
 }
 
-.language-toggle svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.language-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 8px;
+  color: #6d7f83;
+  font: inherit;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease;
+}
+
+.language-option:hover,
+.language-option:focus-visible {
+  color: var(--brand-deep);
+  outline: none;
+}
+
+.language-option.active {
+  color: var(--brand-dark);
+  background: rgba(18, 164, 137, 0.12);
+}
+
+.language-divider {
+  color: rgba(92, 107, 122, 0.56);
 }
 
 .header-cta,
@@ -1615,13 +1631,15 @@ body[data-lang="en"] .qr-card span {
   }
 
   .language-toggle {
-    min-width: 42px;
     min-height: 40px;
-    padding: 0 10px;
+    gap: 4px;
+    padding: 0 6px;
+    font-size: 12px;
   }
 
-  .language-toggle span {
-    display: none;
+  .language-option {
+    min-height: 28px;
+    padding: 0 6px;
   }
 
   .header-cta {

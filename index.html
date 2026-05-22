@@ -27,23 +27,11 @@
         <a href="#governance" data-i18n="navGovernance">安全治理</a>
       </nav>
       <div class="header-actions">
-        <button
-          class="language-toggle"
-          id="language-toggle"
-          type="button"
-          aria-label="Switch to English"
-          data-i18n-aria="languageToggle"
-          title="Switch to English"
-          data-i18n-title="languageToggle"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M3 12h18"></path>
-            <path d="M12 3a13.2 13.2 0 0 1 0 18"></path>
-            <path d="M12 3a13.2 13.2 0 0 0 0 18"></path>
-          </svg>
-          <span data-lang-current>EN</span>
-        </button>
+        <div class="language-toggle" id="language-toggle" role="group" aria-label="Language">
+          <button class="language-option" type="button" data-lang-option="zh">中文</button>
+          <span class="language-divider" aria-hidden="true">/</span>
+          <button class="language-option" type="button" data-lang-option="en">EN</button>
+        </div>
         <a class="header-cta" href="#contact" data-i18n="headerContact">联系我们</a>
       </div>
     </header>
