@@ -18,6 +18,8 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 76px;
+  scroll-snap-type: y proximity;
 }
 
 body {
@@ -182,6 +184,8 @@ main {
   width: min(calc(100% - var(--page-x) * 2), var(--max));
   margin: 0 auto;
   padding: 92px 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
 }
 
 .hero {
@@ -1543,6 +1547,7 @@ body[data-lang="en"] .qr-card span {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+    scroll-snap-type: none;
   }
 
   *,
@@ -1619,6 +1624,11 @@ body[data-lang="en"] .qr-card span {
 }
 
 @media (max-width: 640px) {
+  html {
+    scroll-padding-top: 68px;
+    scroll-snap-type: none;
+  }
+
   .site-header {
     height: 68px;
   }
