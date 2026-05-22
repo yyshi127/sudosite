@@ -19,6 +19,8 @@ const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dbPath = path.join(dataDir, "demo-requests.sqlite");
 const sessions = new Map();
+const sessionTtlMs = 30 * 60 * 1000;
+const sessionCookieMaxAgeSeconds = Math.floor(sessionTtlMs / 1000);
 
 fs.mkdirSync(dataDir, { recursive: true });
 
@@ -30,6 +32,7 @@ db.prepare(`
     name TEXT NOT NULL,
     phone TEXT NOT NULL,
     company TEXT NOT NULL,
+    industry TEXT NOT NULL DEFAULT '',
     message TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   )
@@ -44,6 +47,10 @@ db.prepare(`
 const demoColumns = db.prepare("PRAGMA table_info(demo_requests)").all().map(column => column.name);
 if (!demoColumns.includes("deleted_at")) {
   db.prepare("ALTER TABLE demo_requests ADD COLUMN deleted_at TEXT DEFAULT NULL").run();
+}
+
+if (!demoColumns.includes("industry")) {
+  db.prepare("ALTER TABLE demo_requests ADD COLUMN industry TEXT NOT NULL DEFAULT ''").run();
 }
 
 function hashPassword(password) {
@@ -97,16 +104,55 @@ function parseCookies(header = "") {
   }, {});
 }
 
+function setAdminSessionCookie(res, token) {
+  res.setHeader(
+    "Set-Cookie",
+    `sudo_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${sessionCookieMaxAgeSeconds}`
+  );
+}
+
+function clearAdminSessionCookie(res) {
+  res.setHeader("Set-Cookie", "sudo_admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+}
+
+function createAdminSession(res) {
+  const token = crypto.randomBytes(32).toString("hex");
+  sessions.set(token, Date.now() + sessionTtlMs);
+  setAdminSessionCookie(res, token);
+}
+
 function requireAdmin(req, res, next) {
   const token = parseCookies(req.headers.cookie).sudo_admin_session;
+  const expiresAt = token ? sessions.get(token) : 0;
 
-  if (!token || !sessions.has(token)) {
+  if (!token || !expiresAt) {
     res.status(401).json({ ok: false, error: "请先登录后台" });
     return;
   }
 
+  if (Date.now() > expiresAt) {
+    sessions.delete(token);
+    clearAdminSessionCookie(res);
+    res.status(401).json({ ok: false, error: "登录已过期，请重新登录" });
+    return;
+  }
+
+  sessions.set(token, Date.now() + sessionTtlMs);
+  setAdminSessionCookie(res, token);
   next();
 }
+
+const sessionCleanupTimer = setInterval(() => {
+  const now = Date.now();
+
+  for (const [token, expiresAt] of sessions.entries()) {
+    if (now > expiresAt) {
+      sessions.delete(token);
+    }
+  }
+}, 5 * 60 * 1000);
+
+sessionCleanupTimer.unref();
 
 function normalizeText(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -122,17 +168,18 @@ function validateDemoRequest(body) {
   const name = normalizeText(body.name);
   const phone = normalizeText(body.phone);
   const company = normalizeText(body.company);
+  const industry = normalizeText(body.industry);
   const message = normalizeText(body.message);
 
-  if (!name || !phone || !company) {
-    return { error: "请填写姓名、手机号和公司名称" };
+  if (!name || !phone || !company || !industry) {
+    return { error: "请填写姓名、手机号、公司名称和所属行业" };
   }
 
   if (!/^[+\d][\d\s-]{5,19}$/.test(phone)) {
     return { error: "请填写有效的手机号" };
   }
 
-  return { data: { name, phone, company, message } };
+  return { data: { name, phone, company, industry, message } };
 }
 
 function csvEscape(value) {
@@ -165,8 +212,8 @@ app.post("/api/demo-requests", (req, res) => {
   }
 
   const info = db.prepare(`
-    INSERT INTO demo_requests (name, phone, company, message)
-    VALUES (@name, @phone, @company, @message)
+    INSERT INTO demo_requests (name, phone, company, industry, message)
+    VALUES (@name, @phone, @company, @industry, @message)
   `).run(result.data);
 
   res.json({ ok: true, id: info.lastInsertRowid });
@@ -181,10 +228,30 @@ app.post("/api/admin/login", (req, res) => {
     return;
   }
 
-  const token = crypto.randomBytes(32).toString("hex");
-  sessions.set(token, Date.now());
-  res.setHeader("Set-Cookie", `sudo_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`);
+  createAdminSession(res);
   res.json({ ok: true });
+});
+
+app.post("/api/admin/logout", (req, res) => {
+  const token = parseCookies(req.headers.cookie).sudo_admin_session;
+
+  if (token) {
+    sessions.delete(token);
+  }
+
+  clearAdminSessionCookie(res);
+  res.json({ ok: true });
+});
+
+app.get("/admin/logout", (req, res) => {
+  const token = parseCookies(req.headers.cookie).sudo_admin_session;
+
+  if (token) {
+    sessions.delete(token);
+  }
+
+  clearAdminSessionCookie(res);
+  res.redirect("/admin?logged_out=1");
 });
 
 app.post("/api/admin/change-password", requireAdmin, (req, res) => {
@@ -209,13 +276,15 @@ app.post("/api/admin/change-password", requireAdmin, (req, res) => {
 
   setSetting("admin_password_hash", hashPassword(newPassword));
   sessions.clear();
-  res.setHeader("Set-Cookie", "sudo_admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+  clearAdminSessionCookie(res);
   res.json({ ok: true });
 });
 
 app.get("/api/admin/demo-requests", requireAdmin, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+
   const rows = db.prepare(`
-    SELECT id, name, phone, company, message, created_at
+    SELECT id, name, phone, company, industry, message, created_at
     FROM demo_requests
     WHERE deleted_at IS NULL
     ORDER BY datetime(created_at) DESC, id DESC
@@ -261,19 +330,22 @@ app.delete("/api/admin/demo-requests/:id", requireAdmin, (req, res) => {
 });
 
 app.get("/api/admin/demo-requests.csv", requireAdmin, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+
   const rows = db.prepare(`
-    SELECT id, name, phone, company, message, created_at
+    SELECT id, name, phone, company, industry, message, created_at
     FROM demo_requests
     WHERE deleted_at IS NULL
     ORDER BY datetime(created_at) DESC, id DESC
   `).all();
-  const header = ["ID", "提交时间", "姓名", "手机号", "公司名称", "需求备注"];
+  const header = ["ID", "提交时间", "姓名", "手机号", "公司名称", "所属行业", "需求备注"];
   const body = rows.map(row => [
     row.id,
     row.created_at,
     row.name,
     row.phone,
     row.company,
+    row.industry,
     row.message,
   ].map(csvEscape).join(","));
 
@@ -283,6 +355,7 @@ app.get("/api/admin/demo-requests.csv", requireAdmin, (req, res) => {
 });
 
 app.get("/admin", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   res.sendFile(path.join(rootDir, "admin.html"));
 });
 
@@ -306,6 +379,11 @@ app.use((req, res, next) => {
 app.use(express.static(rootDir, {
   extensions: ["html"],
   index: "index.html",
+  setHeaders(res, filePath) {
+    if (filePath.endsWith("admin.html") || filePath.endsWith("admin.js")) {
+      res.setHeader("Cache-Control", "no-store");
+    }
+  },
 }));
 
 app.listen(port, host, () => {

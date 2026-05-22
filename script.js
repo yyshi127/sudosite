@@ -64,6 +64,9 @@ const demoModal = document.querySelector("#demo-request");
 const demoForm = document.querySelector("#demo-form");
 const demoSuccess = document.querySelector("#demo-success");
 const demoStatus = document.querySelector("#demo-form-status");
+const industrySelect = demoForm.elements.industry;
+const otherIndustryField = document.querySelector(".demo-other-industry");
+const otherIndustryInput = demoForm.elements.industryOther;
 const demoTriggers = [...document.querySelectorAll(".demo-trigger")];
 const demoCloseTargets = [...document.querySelectorAll("[data-demo-close]")];
 let lastFocusedElement = null;
@@ -79,6 +82,21 @@ function showDemoForm() {
   setDemoStatus("");
 }
 
+function updateOtherIndustryField() {
+  const isOtherIndustry = industrySelect.value === "其它行业";
+  otherIndustryField.hidden = !isOtherIndustry;
+  otherIndustryInput.required = isOtherIndustry;
+
+  if (!isOtherIndustry) {
+    otherIndustryInput.value = "";
+  }
+}
+
+function resetDemoForm() {
+  demoForm.reset();
+  updateOtherIndustryField();
+}
+
 function showDemoSuccess() {
   demoForm.hidden = true;
   demoSuccess.hidden = false;
@@ -88,7 +106,7 @@ function showDemoSuccess() {
 function openDemoModal(event) {
   event.preventDefault();
   lastFocusedElement = document.activeElement;
-  demoForm.reset();
+  resetDemoForm();
   showDemoForm();
   demoModal.classList.add("open");
   demoModal.setAttribute("aria-hidden", "false");
@@ -100,7 +118,7 @@ function closeDemoModal() {
   demoModal.classList.remove("open");
   demoModal.setAttribute("aria-hidden", "true");
   document.body.classList.remove("modal-open");
-  demoForm.reset();
+  resetDemoForm();
   showDemoForm();
 
   if (lastFocusedElement) {
@@ -109,8 +127,8 @@ function closeDemoModal() {
 }
 
 function validateDemoForm(data) {
-  if (!data.name || !data.phone || !data.company) {
-    return "请填写姓名、手机号和公司名称";
+  if (!data.name || !data.phone || !data.company || !data.industry) {
+    return "请填写姓名、手机号、公司名称和所属行业";
   }
 
   if (!/^[+\d][\d\s-]{5,19}$/.test(data.phone)) {
@@ -122,6 +140,7 @@ function validateDemoForm(data) {
 
 demoTriggers.forEach(trigger => trigger.addEventListener("click", openDemoModal));
 demoCloseTargets.forEach(target => target.addEventListener("click", closeDemoModal));
+industrySelect.addEventListener("change", updateOtherIndustryField);
 
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && demoModal.classList.contains("open")) {
@@ -137,8 +156,14 @@ demoForm.addEventListener("submit", async event => {
     name: String(formData.get("name") || "").trim(),
     phone: String(formData.get("phone") || "").trim(),
     company: String(formData.get("company") || "").trim(),
+    industry: String(formData.get("industry") || "").trim(),
     message: String(formData.get("message") || "").trim(),
   };
+
+  if (payload.industry === "其它行业") {
+    payload.industry = String(formData.get("industryOther") || "").trim();
+  }
+
   const error = validateDemoForm(payload);
 
   if (error) {
@@ -163,7 +188,7 @@ demoForm.addEventListener("submit", async event => {
       return;
     }
 
-    demoForm.reset();
+    resetDemoForm();
     showDemoSuccess();
   } catch (error) {
     setDemoStatus("网络异常，请稍后重试", "error");
@@ -171,3 +196,5 @@ demoForm.addEventListener("submit", async event => {
     submitButton.disabled = false;
   }
 });
+
+updateOtherIndustryField();

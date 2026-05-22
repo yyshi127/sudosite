@@ -19,13 +19,66 @@ const emptyState = document.querySelector("#admin-empty");
 const countLabel = document.querySelector("#admin-count");
 const selectAllCheckbox = document.querySelector("#admin-select-all");
 const bulkDeleteButton = document.querySelector("#admin-bulk-delete");
+const refreshButton = document.querySelector("#admin-refresh");
+const logoutButton = document.querySelector("#admin-logout");
+const csvExportLink = document.querySelector('a[href="/api/admin/demo-requests.csv"]');
 let currentRows = [];
 let selectedIds = new Set();
 let pendingDeleteIds = [];
+let adminSessionTimer = 0;
+const adminSessionTimeoutMs = 30 * 60 * 1000;
 
 function setStatus(element, message, type = "") {
   element.textContent = message;
   element.dataset.type = type;
+}
+
+function stopAdminIdleTimer() {
+  window.clearTimeout(adminSessionTimer);
+  adminSessionTimer = 0;
+}
+
+function resetAdminIdleTimer() {
+  stopAdminIdleTimer();
+
+  if (dashboard.hidden) return;
+
+  adminSessionTimer = window.setTimeout(() => {
+    showLoginPanel("登录已过期，请重新登录", "error");
+  }, adminSessionTimeoutMs);
+}
+
+function showLoginPanel(message = "登录已过期，请重新登录", type = "error") {
+  stopAdminIdleTimer();
+
+  if (settingsModal.classList.contains("open")) {
+    closeSettings();
+  }
+
+  if (deleteModal.classList.contains("open")) {
+    closeDeleteModal();
+  }
+
+  selectedIds = new Set();
+  pendingDeleteIds = [];
+  updateSelectionState();
+  logoutButton.hidden = true;
+  loginPanel.hidden = false;
+  dashboard.hidden = true;
+  setStatus(loginStatus, message, type);
+}
+
+function handleAuthExpired(response) {
+  if (response.status !== 401) return false;
+
+  showLoginPanel("登录已过期，请重新登录", "error");
+  return true;
+}
+
+function markAdminActivity() {
+  if (!dashboard.hidden) {
+    resetAdminIdleTimer();
+  }
 }
 
 function formatTime(value) {
@@ -96,6 +149,7 @@ function renderRows(rows) {
     tr.appendChild(createCell(row.name));
     tr.appendChild(createCell(row.phone, "admin-nowrap"));
     tr.appendChild(createCell(row.company));
+    tr.appendChild(createCell(row.industry || "-"));
     tr.appendChild(createCell(row.message || "-"));
     tr.appendChild(actionCell);
     tableBody.appendChild(tr);
@@ -167,12 +221,12 @@ function closeDeleteModal() {
 
 async function loadRequests() {
   setStatus(dashboardStatus, "正在加载预约记录...");
-  const response = await fetch("/api/admin/demo-requests", { credentials: "same-origin" });
+  const response = await fetch("/api/admin/demo-requests", {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
 
-  if (response.status === 401) {
-    loginPanel.hidden = false;
-    dashboard.hidden = true;
-    setStatus(loginStatus, "请先输入后台密码", "error");
+  if (handleAuthExpired(response)) {
     return;
   }
 
@@ -185,6 +239,8 @@ async function loadRequests() {
 
   loginPanel.hidden = true;
   dashboard.hidden = false;
+  logoutButton.hidden = false;
+  resetAdminIdleTimer();
   renderRows(result.rows || []);
   setStatus(dashboardStatus, "");
 }
@@ -221,6 +277,10 @@ loginForm.addEventListener("submit", async event => {
   } catch (error) {
     setStatus(loginStatus, "网络异常，请稍后重试", "error");
   }
+});
+
+["click", "input", "keydown", "change"].forEach(eventName => {
+  document.addEventListener(eventName, markAdminActivity, true);
 });
 
 settingsOpen.addEventListener("click", openSettings);
@@ -274,6 +334,66 @@ bulkDeleteButton.addEventListener("click", () => {
   }
 });
 
+refreshButton.addEventListener("click", loadRequests);
+
+logoutButton.addEventListener("click", async () => {
+  logoutButton.disabled = true;
+  setStatus(dashboardStatus, "正在退出登录...");
+
+  try {
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+  } finally {
+    logoutButton.disabled = false;
+    showLoginPanel("已退出登录", "success");
+  }
+});
+
+window.addEventListener("focus", () => {
+  if (!dashboard.hidden) {
+    loadRequests();
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && !dashboard.hidden) {
+    loadRequests();
+  }
+});
+
+csvExportLink.addEventListener("click", async event => {
+  event.preventDefault();
+
+  try {
+    const response = await fetch(csvExportLink.href, { credentials: "same-origin" });
+
+    if (handleAuthExpired(response)) {
+      return;
+    }
+
+    if (!response.ok) {
+      setStatus(dashboardStatus, "CSV 导出失败，请稍后重试", "error");
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "demo-requests.csv";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    URL.revokeObjectURL(url);
+    resetAdminIdleTimer();
+  } catch (error) {
+    setStatus(dashboardStatus, "网络异常，请稍后重试", "error");
+  }
+});
+
 confirmDeleteButton.addEventListener("click", async () => {
   if (!pendingDeleteIds.length) return;
 
@@ -293,6 +413,10 @@ confirmDeleteButton.addEventListener("click", async () => {
           body: JSON.stringify({ ids: pendingDeleteIds }),
         });
     const result = await response.json();
+
+    if (handleAuthExpired(response)) {
+      return;
+    }
 
     if (!response.ok || !result.ok) {
       setStatus(deleteStatus, result.error || "删除失败，请稍后重试", "error");
@@ -343,6 +467,10 @@ passwordForm.addEventListener("submit", async event => {
     });
     const result = await response.json();
 
+    if (handleAuthExpired(response)) {
+      return;
+    }
+
     if (!response.ok || !result.ok) {
       setStatus(passwordStatus, result.error || "密码修改失败", "error");
       return;
@@ -352,9 +480,7 @@ passwordForm.addEventListener("submit", async event => {
     setStatus(passwordStatus, "密码已修改，请使用新密码重新登录。", "success");
     setTimeout(() => {
       closeSettings();
-      loginPanel.hidden = false;
-      dashboard.hidden = true;
-      setStatus(loginStatus, "请使用新密码登录", "success");
+      showLoginPanel("请使用新密码登录", "success");
     }, 900);
   } catch (error) {
     setStatus(passwordStatus, "网络异常，请稍后重试", "error");

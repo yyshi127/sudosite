@@ -8,7 +8,7 @@
       name="description"
       content="数豆科技为出海企业构建 AI-native 财务数智化系统，让利润、现金流、风险和合规在全球经营网络中持续清晰。"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260521-2" />
+    <link rel="stylesheet" href="./styles.css?v=20260521-3" />
   </head>
   <body>
     <header class="site-header">
@@ -157,6 +157,28 @@
             <input name="company" type="text" autocomplete="organization" required />
           </label>
           <label class="demo-field-full">
+            <span>所属行业</span>
+            <select name="industry" required>
+              <option value="">请选择所属行业</option>
+              <option value="跨境电商">跨境电商</option>
+              <option value="海外制造业">海外制造业</option>
+              <option value="供应链">供应链</option>
+              <option value="海外仓储">海外仓储</option>
+              <option value="物流中心">物流中心</option>
+              <option value="海外项目型公司">海外项目型公司</option>
+              <option value="国际工程">国际工程</option>
+              <option value="国际贸易">国际贸易</option>
+              <option value="国际服务">国际服务</option>
+              <option value="会计事务所">会计事务所</option>
+              <option value="财税服务商">财税服务商</option>
+              <option value="其它行业">其它行业</option>
+            </select>
+          </label>
+          <label class="demo-field-full demo-other-industry" hidden>
+            <span>请输入所属行业</span>
+            <input name="industryOther" type="text" autocomplete="organization-title" />
+          </label>
+          <label class="demo-field-full">
             <span>需求备注</span>
             <textarea name="message" rows="4" placeholder="例如：跨境电商、多主体合规、业财税一体化等"></textarea>
           </label>
@@ -206,6 +228,6 @@
       </div>
     </footer>
 
-    <script src="./script.js?v=20260521-2"></script>
+    <script src="./script.js?v=20260521-3"></script>
   </body>
 </html>
