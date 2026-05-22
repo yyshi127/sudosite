@@ -482,9 +482,9 @@ body[data-lang="en"] .qr-card span {
 }
 
 .switch-tab.active {
-  background: #fff;
-  border-color: var(--line);
-  box-shadow: 0 18px 44px rgba(31, 78, 86, 0.075);
+  background: linear-gradient(135deg, rgba(18, 164, 137, 0.12), rgba(255, 255, 255, 0.92));
+  border-color: rgba(18, 164, 137, 0.26);
+  box-shadow: 0 18px 44px rgba(18, 164, 137, 0.12);
   transform: translateX(6px);
 }
 
