@@ -136,21 +136,8 @@ function createCell(text, className = "") {
 
 function createTimeCell(row) {
   const td = document.createElement("td");
-  td.className = "admin-time-cell admin-nowrap";
-
-  const time = document.createElement("span");
-  time.className = "admin-time-text";
-  time.textContent = formatTime(row.created_at);
-  td.appendChild(time);
-
-  if (row.verified_at) {
-    const stamp = document.createElement("span");
-    stamp.className = "admin-verified-stamp";
-    stamp.textContent = "已核实";
-    stamp.title = `核实时间：${formatTime(row.verified_at)}`;
-    td.appendChild(stamp);
-  }
-
+  td.className = "admin-nowrap";
+  td.textContent = formatTime(row.created_at);
   return td;
 }
 
@@ -185,6 +172,14 @@ function renderRows(rows) {
     checkbox.checked = selectedIds.has(row.id);
     checkbox.setAttribute("aria-label", `选择 ${row.name} 的预约记录`);
     selectCell.appendChild(checkbox);
+
+    if (row.verified_at) {
+      const badge = document.createElement("span");
+      badge.className = "admin-verified-corner";
+      badge.textContent = "已核实";
+      badge.title = `核实时间：${formatTime(row.verified_at)}`;
+      selectCell.appendChild(badge);
+    }
 
     const actionCell = document.createElement("td");
     actionCell.className = "admin-action-cell";

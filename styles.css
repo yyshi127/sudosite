@@ -1120,56 +1120,46 @@ body[data-lang="en"] .qr-card span {
 }
 
 .admin-select-cell {
+  position: relative;
   width: 46px;
   text-align: center !important;
 }
 
 .admin-select-cell input {
+  position: relative;
+  z-index: 3;
   width: 16px;
   height: 16px;
   accent-color: var(--brand);
   cursor: pointer;
 }
 
+.admin-row-verified .admin-select-cell {
+  padding-top: 30px;
+}
+
 .admin-nowrap {
   white-space: nowrap;
 }
 
-.admin-time-cell {
-  position: relative;
-  min-width: 156px;
-}
-
-.admin-time-text {
-  position: relative;
-  z-index: 1;
-}
-
-.admin-verified-stamp {
+.admin-verified-corner {
   position: absolute;
   z-index: 2;
-  top: 9px;
-  left: 38px;
+  top: 0;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 70px;
-  min-height: 28px;
-  padding: 0 10px;
-  color: var(--brand-dark);
-  font-size: 13px;
+  width: 48px;
+  height: 22px;
+  color: #ffffff;
+  font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.08em;
-  border: 2px solid rgba(18, 164, 137, 0.66);
-  border-radius: 999px;
+  letter-spacing: 0.04em;
   background:
-    linear-gradient(135deg, rgba(18, 164, 137, 0.16), rgba(255, 255, 255, 0.38)),
-    rgba(232, 248, 244, 0.56);
-  box-shadow:
-    0 8px 18px rgba(18, 164, 137, 0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.48);
-  opacity: 0.72;
-  transform: rotate(-5deg);
+    linear-gradient(135deg, var(--brand-dark), var(--brand) 68%, rgba(18, 164, 137, 0.86));
+  box-shadow: 0 6px 14px rgba(18, 164, 137, 0.18);
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
   pointer-events: none;
 }
 
