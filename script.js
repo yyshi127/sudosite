@@ -323,6 +323,7 @@ const images = [...document.querySelectorAll(".stage-img")];
 const captionTitle = document.querySelector(".stage-caption h3");
 const captionBody = document.querySelector(".stage-caption p:last-child");
 const progress = document.querySelector(".stage-progress");
+const stageCaption = document.querySelector(".stage-caption");
 const demoModal = document.querySelector("#demo-request");
 const demoForm = document.querySelector("#demo-form");
 const demoSuccess = document.querySelector("#demo-success");
@@ -334,6 +335,8 @@ const demoTriggers = [...document.querySelectorAll(".demo-trigger")];
 const demoCloseTargets = [...document.querySelectorAll("[data-demo-close]")];
 let active = 0;
 let timer;
+let captionFadeTimer;
+let slideInitialized = false;
 let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh";
 let lastFocusedElement = null;
 
@@ -397,8 +400,21 @@ function setSlide(index) {
   active = index;
   tabs.forEach((tab, i) => tab.classList.toggle("active", i === index));
   images.forEach((img, i) => img.classList.toggle("active", i === index));
-  captionTitle.textContent = slides[index].title;
-  captionBody.textContent = slides[index].body;
+
+  clearTimeout(captionFadeTimer);
+  if (!slideInitialized) {
+    captionTitle.textContent = slides[index].title;
+    captionBody.textContent = slides[index].body;
+    slideInitialized = true;
+  } else {
+    stageCaption.classList.add("fading");
+    captionFadeTimer = setTimeout(() => {
+      captionTitle.textContent = slides[index].title;
+      captionBody.textContent = slides[index].body;
+      stageCaption.classList.remove("fading");
+    }, 150);
+  }
+
   progress.classList.remove("running");
   void progress.offsetWidth;
   progress.classList.add("running");
