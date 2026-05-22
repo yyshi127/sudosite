@@ -1084,9 +1084,42 @@ body[data-lang="en"] .qr-card span {
 .admin-table {
   width: 100%;
   min-width: 1080px;
+  table-layout: fixed;
   border-collapse: collapse;
   color: var(--ink);
   font-size: 14px;
+}
+
+.admin-col-select {
+  width: 58px;
+}
+
+.admin-col-time {
+  width: 152px;
+}
+
+.admin-col-name {
+  width: 94px;
+}
+
+.admin-col-phone {
+  width: 136px;
+}
+
+.admin-col-company {
+  width: 178px;
+}
+
+.admin-col-industry {
+  width: 132px;
+}
+
+.admin-col-message {
+  width: auto;
+}
+
+.admin-col-action {
+  width: 136px;
 }
 
 .admin-table th,
@@ -1164,13 +1197,26 @@ body[data-lang="en"] .qr-card span {
 }
 
 .admin-action-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding-right: 6px !important;
+  padding-left: 6px !important;
   white-space: nowrap;
 }
 
+.admin-action-heading {
+  padding-right: 6px !important;
+  padding-left: 6px !important;
+}
+
+.admin-action-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .admin-table-verify {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 34px;
   padding: 0 12px;
   color: var(--brand-dark);

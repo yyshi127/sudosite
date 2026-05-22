@@ -65,6 +65,16 @@
         <p class="admin-status" id="admin-dashboard-status" role="status" aria-live="polite"></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
+            <colgroup>
+              <col class="admin-col-select" />
+              <col class="admin-col-time" />
+              <col class="admin-col-name" />
+              <col class="admin-col-phone" />
+              <col class="admin-col-company" />
+              <col class="admin-col-industry" />
+              <col class="admin-col-message" />
+              <col class="admin-col-action" />
+            </colgroup>
             <thead>
               <tr>
                 <th class="admin-select-cell">
@@ -76,7 +86,7 @@
                 <th>公司名称</th>
                 <th>所属行业</th>
                 <th>需求备注</th>
-                <th>操作</th>
+                <th class="admin-action-heading">操作</th>
               </tr>
             </thead>
             <tbody id="admin-requests-body"></tbody>

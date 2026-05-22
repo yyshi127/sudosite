@@ -183,6 +183,9 @@ function renderRows(rows) {
 
     const actionCell = document.createElement("td");
     actionCell.className = "admin-action-cell";
+    const actionButtons = document.createElement("div");
+    actionButtons.className = "admin-action-buttons";
+
     const verifyButton = document.createElement("button");
     verifyButton.className = "admin-table-verify";
     verifyButton.type = "button";
@@ -190,7 +193,7 @@ function renderRows(rows) {
     verifyButton.dataset.verified = row.verified_at ? "true" : "false";
     verifyButton.textContent = row.verified_at ? "取消核实" : "核实";
     verifyButton.setAttribute("aria-label", `${row.verified_at ? "取消核实" : "核实"} ${row.name} 的预约记录`);
-    actionCell.appendChild(verifyButton);
+    actionButtons.appendChild(verifyButton);
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "admin-table-delete";
@@ -207,7 +210,8 @@ function renderRows(rows) {
         <path d="M14 11v5" />
       </svg>
     `;
-    actionCell.appendChild(deleteButton);
+    actionButtons.appendChild(deleteButton);
+    actionCell.appendChild(actionButtons);
 
     tr.appendChild(selectCell);
     tr.appendChild(createTimeCell(row));
