@@ -323,6 +323,7 @@ const images = [...document.querySelectorAll(".stage-img")];
 const captionTitle = document.querySelector(".stage-caption h3");
 const captionBody = document.querySelector(".stage-caption p:last-child");
 const progress = document.querySelector(".stage-progress");
+const switchStage = document.querySelector(".switch-stage");
 const stageCaption = document.querySelector(".stage-caption");
 const demoModal = document.querySelector("#demo-request");
 const demoForm = document.querySelector("#demo-form");
@@ -336,6 +337,7 @@ const demoCloseTargets = [...document.querySelectorAll("[data-demo-close]")];
 let active = 0;
 let timer;
 let captionFadeTimer;
+let slideTransitionTimer;
 let slideInitialized = false;
 let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh";
 let lastFocusedElement = null;
@@ -392,32 +394,50 @@ function applyLanguage(language) {
 
   updateOtherIndustryField();
   setDemoStatus("");
-  setSlide(active);
+  setSlide(active, true);
 }
 
-function setSlide(index) {
+function updateSlideContent(index) {
   const slides = getCopy("slides");
-  active = index;
-  tabs.forEach((tab, i) => tab.classList.toggle("active", i === index));
   images.forEach((img, i) => img.classList.toggle("active", i === index));
-
-  clearTimeout(captionFadeTimer);
-  if (!slideInitialized) {
-    captionTitle.textContent = slides[index].title;
-    captionBody.textContent = slides[index].body;
-    slideInitialized = true;
-  } else {
-    stageCaption.classList.add("fading");
-    captionFadeTimer = setTimeout(() => {
-      captionTitle.textContent = slides[index].title;
-      captionBody.textContent = slides[index].body;
-      stageCaption.classList.remove("fading");
-    }, 150);
-  }
+  captionTitle.textContent = slides[index].title;
+  captionBody.textContent = slides[index].body;
 
   progress.classList.remove("running");
   void progress.offsetWidth;
   progress.classList.add("running");
+}
+
+function setActiveTab(index) {
+  tabs.forEach((tab, i) => tab.classList.toggle("active", i === index));
+}
+
+function setSlide(index, immediate = false) {
+  clearTimeout(captionFadeTimer);
+  clearTimeout(slideTransitionTimer);
+  const previousActive = active;
+  active = index;
+  setActiveTab(index);
+
+  if (immediate || !slideInitialized || index === previousActive) {
+    switchStage.classList.remove("switching");
+    stageCaption.classList.remove("fading");
+    updateSlideContent(index);
+    slideInitialized = true;
+    return;
+  }
+
+  switchStage.classList.add("switching");
+  stageCaption.classList.add("fading");
+
+  slideTransitionTimer = setTimeout(() => {
+    updateSlideContent(index);
+
+    requestAnimationFrame(() => {
+      switchStage.classList.remove("switching");
+      stageCaption.classList.remove("fading");
+    });
+  }, 260);
 }
 
 function startAuto() {

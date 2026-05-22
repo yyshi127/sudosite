@@ -440,6 +440,7 @@ body[data-lang="en"] .qr-card span {
 }
 
 .switch-tab {
+  position: relative;
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
   align-items: center;
@@ -452,16 +453,32 @@ body[data-lang="en"] .qr-card span {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 14px;
+  overflow: hidden;
   cursor: pointer;
   transition:
-    background 420ms ease,
     border-color 420ms ease,
     box-shadow 420ms ease,
     transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.switch-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, rgba(18, 164, 137, 0.13), rgba(255, 255, 255, 0.92));
+  opacity: 0;
+  transition: opacity 620ms ease;
+}
+
+.switch-tab.active::before {
+  opacity: 1;
+}
+
 .switch-tab small,
 .switch-tab strong {
+  position: relative;
+  z-index: 1;
   display: block;
 }
 
@@ -487,7 +504,6 @@ body[data-lang="en"] .qr-card span {
 }
 
 .switch-tab.active {
-  background: linear-gradient(135deg, rgba(18, 164, 137, 0.12), rgba(255, 255, 255, 0.92));
   border-color: rgba(18, 164, 137, 0.26);
   box-shadow: 0 18px 44px rgba(18, 164, 137, 0.12);
   transform: translateX(6px);
