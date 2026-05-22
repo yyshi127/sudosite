@@ -139,8 +139,9 @@ body[data-lang="zh"] .nav {
 }
 
 .language-option.active {
-  color: var(--brand-dark);
-  background: rgba(18, 164, 137, 0.12);
+  color: #ffffff;
+  background: var(--brand);
+  transition: none;
 }
 
 .language-divider {
