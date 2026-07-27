@@ -13,6 +13,8 @@ if (!bootstrapAdminPassword) {
 }
 
 const app = express();
+app.set("trust proxy", "loopback");
+
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "127.0.0.1";
 const rootDir = __dirname;
@@ -95,7 +97,70 @@ if (!getSetting("admin_password_hash")) {
   setSetting("admin_password_hash", hashPassword(bootstrapAdminPassword));
 }
 
+function createRateLimiter({ windowMs, maxRequests, errorMessage }) {
+  const clients = new Map();
+  const cleanupTimer = setInterval(() => {
+    const now = Date.now();
+
+    for (const [key, entry] of clients.entries()) {
+      if (now >= entry.resetAt) {
+        clients.delete(key);
+      }
+    }
+  }, windowMs);
+
+  cleanupTimer.unref();
+
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = req.ip || req.socket.remoteAddress || "unknown";
+    const entry = clients.get(key);
+
+    if (!entry || now >= entry.resetAt) {
+      clients.set(key, { count: 1, resetAt: now + windowMs });
+      next();
+      return;
+    }
+
+    if (entry.count >= maxRequests) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
+      res.setHeader("Retry-After", String(retryAfterSeconds));
+      res.status(429).json({ ok: false, error: errorMessage });
+      return;
+    }
+
+    entry.count += 1;
+    next();
+  };
+}
+
+const adminLoginRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  maxRequests: 10,
+  errorMessage: "\u767b\u5f55\u5c1d\u8bd5\u8fc7\u4e8e\u9891\u7e41\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5",
+});
+const demoRequestRateLimiter = createRateLimiter({
+  windowMs: 10 * 60 * 1000,
+  maxRequests: 5,
+  errorMessage: "\u9884\u7ea6\u63d0\u4ea4\u8fc7\u4e8e\u9891\u7e41\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5",
+});
+
+app.use("/api/admin/login", adminLoginRateLimiter);
+app.use("/api/demo-requests", demoRequestRateLimiter);
 app.use(express.json({ limit: "32kb" }));
+app.use((error, req, res, next) => {
+  if (error && error.type === "entity.parse.failed") {
+    res.status(400).json({ ok: false, error: "\u8bf7\u6c42\u683c\u5f0f\u4e0d\u6b63\u786e" });
+    return;
+  }
+
+  if (error && error.type === "entity.too.large") {
+    res.status(413).json({ ok: false, error: "\u8bf7\u6c42\u5185\u5bb9\u8fc7\u5927" });
+    return;
+  }
+
+  next(error);
+});
 
 function parseCookies(header = "") {
   return header.split(";").reduce((cookies, pair) => {
@@ -421,6 +486,17 @@ app.use(express.static(rootDir, {
     }
   },
 }));
+
+app.use((error, req, res, next) => {
+  console.error("Unhandled request error:", error);
+
+  if (res.headersSent) {
+    next(error);
+    return;
+  }
+
+  res.status(500).json({ ok: false, error: "\u670d\u52a1\u5668\u6682\u65f6\u4e0d\u53ef\u7528" });
+});
 
 app.listen(port, host, () => {
   console.log(`SUDO website server running at http://${host}:${port}`);

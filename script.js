@@ -135,7 +135,6 @@ const i18n = {
     footerAddress: "苏州工业园区万盛街8号圆融大厦1707",
     footerPrivacy: "隐私政策",
     footerTerms: "服务条款",
-    footerIcp: "ICP备案中...",
     footerCopyright: "© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.",
     footerChannels: "官方账号二维码",
     wechatImage: {
@@ -290,7 +289,6 @@ const i18n = {
     footerAddress: "Room 1707, Yuanrong Building, No. 8 Wansheng Street, Suzhou Industrial Park",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
-    footerIcp: "ICP filing in progress",
     footerCopyright: "© 2026 Ruihua Cloud SUDO Technology (Suzhou) Co., Ltd. All rights reserved.",
     footerChannels: "Official account QR codes",
     wechatImage: {
@@ -330,7 +328,7 @@ const otherIndustryField = document.querySelector(".demo-other-industry");
 const otherIndustryInput = demoForm.elements.industryOther;
 const demoTriggers = [...document.querySelectorAll(".demo-trigger")];
 const demoCloseTargets = [...document.querySelectorAll("[data-demo-close]")];
-const snapSections = [...document.querySelectorAll(".hero, #value, #architecture, #scenes, #switcher, #governance, #contact")];
+const snapSections = [...document.querySelectorAll(".hero, #value, #architecture, #scenes, #switcher, #governance, .closing-screen")];
 let active = 0;
 let timer;
 let captionFadeTimer;
@@ -340,7 +338,7 @@ let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh
 let lastFocusedElement = null;
 let snapLocked = false;
 let snapUnlockTimer = 0;
-const snapMediaQuery = window.matchMedia("(min-width: 900px)");
+const snapMediaQuery = window.matchMedia("(min-width: 981px) and (min-height: 680px)");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const snapWheelThreshold = 40;
 const snapLockMs = 850;
@@ -555,8 +553,11 @@ function scrollToSnapSection(index) {
   const target = snapSections[index];
   if (!target) return;
 
+  const headerHeight = document.querySelector(".site-header").getBoundingClientRect().height;
+  const targetTop = target.offsetTop - headerHeight;
+
   snapLocked = true;
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.scrollTo({ top: targetTop, behavior: "smooth" });
   releaseSnapLock();
 }
 

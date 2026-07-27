@@ -8,7 +8,7 @@
       name="description"
       content="数豆科技为出海企业构建 AI-native 财务数智化系统，让利润、现金流、风险和合规在全球经营网络中持续清晰。"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260522-6" />
+    <link rel="stylesheet" href="./styles.css?v=20260727-13" />
   </head>
   <body data-lang="zh">
     <header class="site-header">
@@ -32,7 +32,7 @@
           <span class="language-divider" aria-hidden="true">/</span>
           <button class="language-option" type="button" data-lang-option="en">EN</button>
         </div>
-        <a class="header-cta" href="#contact" data-i18n="headerContact">联系我们</a>
+        <a class="header-cta" href="#page-end" data-i18n="headerContact">联系我们</a>
       </div>
     </header>
 
@@ -179,12 +179,12 @@
         </div>
       </section>
 
-      <section class="contact reveal" id="contact">
-        <p class="eyebrow" data-i18n="contactEyebrow">Ready for global finance operations</p>
-        <h2 data-i18n="contactTitle">让财务系统从记录过去，走向判断未来。</h2>
-        <a class="button primary demo-trigger" href="#demo-request" data-i18n="primaryCta">预约产品演示</a>
-      </section>
-    </main>
+      <div class="closing-screen">
+        <section class="contact reveal" id="contact">
+          <p class="eyebrow" data-i18n="contactEyebrow">Ready for global finance operations</p>
+          <h2 data-i18n="contactTitle">让财务系统从记录过去，走向判断未来。</h2>
+          <a class="button primary demo-trigger" href="#demo-request" data-i18n="primaryCta">预约产品演示</a>
+        </section>
 
     <div class="demo-modal" id="demo-request" aria-hidden="true">
       <div class="demo-backdrop" data-demo-close></div>
@@ -252,52 +252,65 @@
 
     <footer class="site-footer">
       <div class="footer-inner">
-        <div class="footer-brand">
-          <strong data-i18n="footerBrand">SUDO 数豆科技</strong>
-          <span>
-            <a href="tel:051265001666">0512-65001666</a>
-            <a href="mailto:hello@sudo.finance">hello@sudo.finance</a>
-          </span>
-          <span data-i18n="footerAddress">苏州工业园区万盛街8号圆融大厦1707</span>
-          <span class="footer-links">
-            <a href="#" data-i18n="footerPrivacy">隐私政策</a>
-            <a href="#" data-i18n="footerTerms">服务条款</a>
-            <span data-i18n="footerIcp">ICP备案中...</span>
-          </span>
-          <p data-i18n="footerCopyright">© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</p>
+        <div class="footer-main">
+          <div class="footer-brand">
+            <strong data-i18n="footerBrand">SUDO 数豆科技</strong>
+            <span class="footer-contact-item">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.28-1.28a2 2 0 0 1 2.11-.45c.9.33 1.84.56 2.8.69A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              <a href="tel:051265001666">0512-65001666</a>
+            </span>
+            <span class="footer-contact-item">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span data-i18n="footerAddress">苏州工业园区万盛街8号圆融大厦1707</span>
+            </span>
+          </div>
+          <div class="footer-channels" aria-label="官方账号二维码" data-i18n-aria="footerChannels">
+            <div class="qr-card">
+              <img
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                data-i18n-src="wechatImage"
+                alt="数豆科技服务号二维码"
+                data-i18n-alt="wechatImage"
+              />
+              <span data-i18n="wechatLabel">服务号</span>
+            </div>
+            <div class="qr-card">
+              <img
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                data-i18n-src="videoImage"
+                alt="数豆科技视频号二维码"
+                data-i18n-alt="videoImage"
+              />
+              <span data-i18n="videoLabel">视频号</span>
+            </div>
+            <div class="qr-card">
+              <img
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                data-i18n-src="ruihuaImage"
+                alt="瑞华云二维码"
+                data-i18n-alt="ruihuaImage"
+              />
+              <span data-i18n="ruihuaLabel">瑞华云</span>
+            </div>
+          </div>
         </div>
-        <div class="footer-channels" aria-label="官方账号二维码" data-i18n-aria="footerChannels">
-          <div class="qr-card">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-              data-i18n-src="wechatImage"
-              alt="数豆科技服务号二维码"
-              data-i18n-alt="wechatImage"
-            />
-            <span data-i18n="wechatLabel">服务号</span>
-          </div>
-          <div class="qr-card">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-              data-i18n-src="videoImage"
-              alt="数豆科技视频号二维码"
-              data-i18n-alt="videoImage"
-            />
-            <span data-i18n="videoLabel">视频号</span>
-          </div>
-          <div class="qr-card">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-              data-i18n-src="ruihuaImage"
-              alt="瑞华云二维码"
-              data-i18n-alt="ruihuaImage"
-            />
-            <span data-i18n="ruihuaLabel">瑞华云</span>
-          </div>
+        <div class="footer-bottom" id="page-end">
+          <p data-i18n="footerCopyright">© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</p>
+          <span class="footer-links">
+            <a href="./privacy.html" data-i18n="footerPrivacy">隐私政策</a>
+            <a href="./terms.html" data-i18n="footerTerms">服务条款</a>
+          </span>
         </div>
       </div>
     </footer>
+      </div>
+    </main>
 
-    <script src="./script.js?v=20260522-5"></script>
+    <script src="./script.js?v=20260727-7"></script>
   </body>
 </html>
