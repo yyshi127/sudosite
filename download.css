@@ -9,6 +9,7 @@
   --surface: #ffffff;
   --page-x: clamp(24px, 5vw, 80px);
   --max-width: 1440px;
+  --content-edge: max(var(--page-x), calc((100vw - var(--max-width)) / 2));
 }
 
 * {
@@ -343,28 +344,32 @@ button {
 
 .product-visual {
   position: relative;
+  display: flex;
+  justify-content: flex-end;
   min-width: 0;
 }
 
 .product-window {
+  --product-shift-x: calc(var(--content-edge) + 25%);
   position: relative;
   overflow: hidden;
-  width: min(100%, 840px);
-  aspect-ratio: 1620 / 1352;
+  width: clamp(900px, 75vw, 1080px);
+  flex: 0 0 auto;
+  aspect-ratio: 2160 / 1352;
   border: 1px solid rgba(201, 219, 220, 0.96);
   border-radius: 8px;
   background: #ffffff;
   box-shadow:
     0 22px 42px rgba(16, 33, 45, 0.12),
     0 52px 100px rgba(18, 164, 137, 0.13);
-  transform: translateY(-3px);
+  transform: translate(var(--product-shift-x), -3px);
   animation: product-float 7s ease-in-out infinite;
   will-change: transform;
 }
 
 .product-window img {
   display: block;
-  width: 133.333%;
+  width: 100%;
   max-width: none;
   height: 100%;
   object-fit: cover;
@@ -374,11 +379,11 @@ button {
 @keyframes product-float {
   0%,
   100% {
-    transform: translateY(-3px);
+    transform: translate(var(--product-shift-x), -3px);
   }
 
   50% {
-    transform: translateY(5px);
+    transform: translate(var(--product-shift-x), 5px);
   }
 }
 
@@ -447,6 +452,7 @@ button {
   }
 
   .product-window {
+    --product-shift-x: 0px;
     width: 100%;
     aspect-ratio: 2160 / 1352;
   }
@@ -562,6 +568,6 @@ button {
 
   .product-window {
     animation: none;
-    transform: none;
+    transform: translateX(var(--product-shift-x));
   }
 }
