@@ -904,7 +904,7 @@ body[data-lang="en"] .qr-card span {
 
 .footer-main {
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 34px;
   align-items: center;
 }
@@ -936,6 +936,36 @@ body[data-lang="en"] .qr-card span {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.footer-products {
+  display: grid;
+  align-self: start;
+  justify-self: center;
+  justify-items: start;
+  gap: 9px;
+  padding-top: 2px;
+  text-align: left;
+}
+
+.footer-products strong {
+  color: var(--heading);
+  font-size: 15px;
+  font-weight: 760;
+}
+
+.footer-products a {
+  width: fit-content;
+  color: var(--heading-soft);
+  transition: color 180ms ease;
+}
+
+.footer-products a:hover {
+  color: var(--brand-dark);
+}
+
+.footer-channels {
+  justify-self: end;
 }
 
 .footer-bottom {
