@@ -329,6 +329,11 @@ button {
   box-shadow: 0 0 0 4px rgba(227, 160, 46, 0.12);
 }
 
+.release-status.is-ready .status-dot {
+  background: var(--brand);
+  box-shadow: 0 0 0 4px rgba(18, 164, 137, 0.14);
+}
+
 .compatibility {
   display: flex;
   margin-top: 29px;

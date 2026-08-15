@@ -59,6 +59,7 @@ const languageOptions = [...document.querySelectorAll("[data-lang-option]")];
 const downloadButton = document.querySelector("#windows-download");
 const downloadLabel = document.querySelector("[data-download-label]");
 const releaseStatus = document.querySelector("[data-release-status]");
+const releaseStatusRow = releaseStatus.closest(".release-status");
 const metaDescription = document.querySelector('meta[name="description"]');
 
 let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh";
@@ -101,6 +102,7 @@ function applyText(language) {
     downloadButton.removeAttribute("aria-disabled");
     downloadButton.removeAttribute("tabindex");
     downloadButton.classList.remove("is-preparing");
+    releaseStatusRow.classList.add("is-ready");
     downloadLabel.textContent = dictionary.downloadReady;
     releaseStatus.textContent = dictionary.releaseReady;
   } else {
@@ -108,6 +110,7 @@ function applyText(language) {
     downloadButton.setAttribute("aria-disabled", "true");
     downloadButton.setAttribute("tabindex", "-1");
     downloadButton.classList.add("is-preparing");
+    releaseStatusRow.classList.remove("is-ready");
     downloadLabel.textContent = dictionary.downloadPreparing;
     releaseStatus.textContent = dictionary.releasePreparing;
   }
