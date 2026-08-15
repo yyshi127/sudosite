@@ -1,4 +1,4 @@
-const DOWNLOAD_URL = "./downloads/xiaojing-accounting-0.1.5-windows-x64-setup.exe";
+const DOWNLOAD_URL = "./downloads/xiaojing-accounting-0.1.6-windows-x64-setup.exe";
 
 const translations = {
   zh: {
