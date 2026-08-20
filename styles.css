@@ -1085,6 +1085,17 @@ body[data-lang="en"] .qr-card span {
   line-height: 1.55;
 }
 
+.legal-filing {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  text-align: right;
+}
+
+.legal-filing a:hover {
+  color: var(--brand-dark);
+}
+
 @media (max-width: 700px) {
   .legal-main {
     align-items: start;
