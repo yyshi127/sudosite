@@ -362,7 +362,7 @@ button {
   --product-shift-x: calc(var(--content-edge) + 10%);
   position: relative;
   overflow: hidden;
-  width: clamp(900px, 75vw, 1080px);
+  width: clamp(760px, 62vw, 1080px);
   flex: 0 0 auto;
   aspect-ratio: 2160 / 1352;
   border: 1px solid rgba(201, 219, 220, 0.96);
@@ -444,7 +444,7 @@ button {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .download-page {
     overflow: visible;
   }
