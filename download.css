@@ -425,6 +425,18 @@ button {
   transition: color 180ms ease;
 }
 
+.download-footer .public-security-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.download-footer .public-security-link img {
+  width: 16px;
+  height: 17px;
+  object-fit: contain;
+}
+
 .download-footer a:hover {
   color: var(--brand-dark);
 }
