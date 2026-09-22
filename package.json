@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --check server.js && node --check admin.js && node --check feedback.js && node --check feedback-admin.js",
+    "test": "node tests/feedback-system.test.cjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.6",

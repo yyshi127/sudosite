@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUDO 数豆｜预约演示后台</title>
-    <link rel="stylesheet" href="./styles.css?v=20260522-3" />
-    <script src="./admin.js?v=20260522-3" defer></script>
+    <link rel="stylesheet" href="./feedback.css?v=20260921-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260922-2" />
+    <script src="./admin.js?v=20260922-1" defer></script>
+    <script src="./feedback-admin.js?v=20260922-1" defer></script>
   </head>
   <body class="admin-page">
     <header class="admin-header">
@@ -13,7 +15,14 @@
         <img src="./assets/sudo-logo-gray-source.png" alt="SUDO 数豆科技" />
       </a>
       <div class="admin-header-actions">
-        <span>预约演示后台</span>
+        <div class="admin-view-tabs" role="tablist" aria-label="后台模块">
+          <button id="admin-tab-requests" class="admin-view-tab is-active" type="button" role="tab" aria-controls="admin-dashboard" aria-selected="true" tabindex="0" data-admin-view="requests">
+            <span class="admin-tab-label-full">预约演示后台</span><span class="admin-tab-label-short">预约后台</span><span class="admin-tab-label-tiny">预约</span>
+          </button>
+          <button id="admin-tab-feedback" class="admin-view-tab" type="button" role="tab" aria-controls="feedback-admin-dashboard" aria-selected="false" tabindex="-1" data-admin-view="feedback">
+            <span class="admin-tab-label-full">问题反馈后台</span><span class="admin-tab-label-short">反馈后台</span><span class="admin-tab-label-tiny">反馈</span>
+          </button>
+        </div>
         <button class="admin-icon-button" id="admin-settings-open" type="button" aria-label="后台设置" title="后台设置">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 15.4A3.4 3.4 0 1 0 12 8.6a3.4 3.4 0 0 0 0 6.8Z" />
@@ -33,7 +42,7 @@
     <main class="admin-shell">
       <section class="admin-login" id="admin-login">
         <p class="eyebrow">Admin access</p>
-        <h1>查看预约线索</h1>
+        <h1 id="admin-login-title">查看预约线索</h1>
         <form class="admin-login-form" id="admin-login-form">
           <label>
             <span>后台密码</span>
@@ -44,7 +53,7 @@
         </form>
       </section>
 
-      <section class="admin-dashboard" id="admin-dashboard" hidden>
+      <section class="admin-dashboard" id="admin-dashboard" role="tabpanel" aria-labelledby="admin-tab-requests" hidden>
         <div class="admin-toolbar">
           <div>
             <p class="eyebrow">Demo requests</p>
@@ -93,6 +102,38 @@
           </table>
           <div class="admin-empty" id="admin-empty" hidden>暂无预约提交记录</div>
         </div>
+      </section>
+
+      <section class="feedback-admin-dashboard admin-feedback-panel" id="feedback-admin-dashboard" role="tabpanel" aria-labelledby="admin-tab-feedback" hidden>
+        <div class="feedback-admin-toolbar">
+          <div>
+            <p>Product feedback</p>
+            <h1>意见反馈记录</h1>
+          </div>
+          <div class="feedback-admin-tools">
+            <span id="feedback-admin-count">0 条反馈</span>
+            <div class="feedback-admin-filters" role="group" aria-label="反馈类型筛选">
+              <button class="active" type="button" data-type-filter="all">全部</button>
+              <button type="button" data-type-filter="issue">问题</button>
+              <button type="button" data-type-filter="suggestion">建议</button>
+            </div>
+            <label class="feedback-admin-status-filter">
+              <span>状态</span>
+              <select id="feedback-admin-status-filter">
+                <option value="all">全部状态</option>
+                <option value="pending_evaluation">待评估</option>
+                <option value="evaluated_pending">已评估待定</option>
+                <option value="adopted">已采纳</option>
+                <option value="resolved">已解决</option>
+                <option value="launched">已上线</option>
+              </select>
+            </label>
+            <button class="feedback-admin-refresh" id="feedback-admin-refresh" type="button">刷新</button>
+          </div>
+        </div>
+        <p class="feedback-admin-status" id="feedback-admin-dashboard-status" role="status" aria-live="polite"></p>
+        <div class="feedback-admin-list" id="feedback-admin-list"></div>
+        <div class="feedback-admin-empty" id="feedback-admin-empty" hidden>暂无符合条件的反馈</div>
       </section>
 
       <div class="admin-settings-modal" id="admin-settings" aria-hidden="true">

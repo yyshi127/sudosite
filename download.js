@@ -26,6 +26,7 @@ const translations = {
     legalAria: "法律信息",
     privacy: "隐私政策",
     terms: "服务条款",
+    feedback: "问题建议反馈",
   },
   en: {
     metaTitle: "Xiaojing Accounting - Windows Download | SUDO Technology",
@@ -52,6 +53,7 @@ const translations = {
     legalAria: "Legal information",
     privacy: "Privacy Policy",
     terms: "Terms of Service",
+    feedback: "Feedback & suggestions",
   },
 };
 

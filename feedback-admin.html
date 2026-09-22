@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小兢会计｜意见反馈后台</title>
+    <link rel="stylesheet" href="./feedback.css?v=20260921-1" />
+    <script src="./feedback-admin.js?v=20260921-1" defer></script>
+  </head>
+  <body class="feedback-admin-page">
+    <header class="feedback-header feedback-admin-header">
+      <a class="feedback-brand" href="/" aria-label="返回数豆科技官网">
+        <img src="./assets/sudo-logo-gray-source.png" alt="SUDO 数豆科技" />
+        <span></span>
+        <strong>意见反馈后台</strong>
+      </a>
+      <nav class="feedback-admin-nav" aria-label="后台导航">
+        <a href="./admin">预约后台</a>
+        <button id="feedback-admin-logout" type="button" hidden>退出</button>
+      </nav>
+    </header>
+
+    <main class="feedback-admin-shell">
+      <section class="feedback-admin-login" id="feedback-admin-login">
+        <p>Admin access</p>
+        <h1>管理意见反馈</h1>
+        <form id="feedback-admin-login-form">
+          <label>
+            <span>后台密码</span>
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <p class="feedback-admin-status" id="feedback-admin-login-status" role="status" aria-live="polite"></p>
+          <button type="submit">进入后台</button>
+        </form>
+      </section>
+
+      <section class="feedback-admin-dashboard" id="feedback-admin-dashboard" hidden>
+        <div class="feedback-admin-toolbar">
+          <div>
+            <p>Product feedback</p>
+            <h1>意见反馈记录</h1>
+          </div>
+          <div class="feedback-admin-tools">
+            <span id="feedback-admin-count">0 条反馈</span>
+            <div class="feedback-admin-filters" role="group" aria-label="反馈类型筛选">
+              <button class="active" type="button" data-type-filter="all">全部</button>
+              <button type="button" data-type-filter="issue">问题</button>
+              <button type="button" data-type-filter="suggestion">建议</button>
+            </div>
+            <label class="feedback-admin-status-filter">
+              <span>状态</span>
+              <select id="feedback-admin-status-filter">
+                <option value="all">全部状态</option>
+                <option value="pending_evaluation">待评估</option>
+                <option value="evaluated_pending">已评估待定</option>
+                <option value="adopted">已采纳</option>
+                <option value="resolved">已解决</option>
+                <option value="launched">已上线</option>
+              </select>
+            </label>
+            <button class="feedback-admin-refresh" id="feedback-admin-refresh" type="button">刷新</button>
+          </div>
+        </div>
+        <p class="feedback-admin-status" id="feedback-admin-dashboard-status" role="status" aria-live="polite"></p>
+        <div class="feedback-admin-list" id="feedback-admin-list"></div>
+        <div class="feedback-admin-empty" id="feedback-admin-empty" hidden>暂无符合条件的反馈</div>
+      </section>
+    </main>
+  </body>
+</html>

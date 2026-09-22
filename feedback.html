@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="向小兢会计提交问题或产品建议。" />
+    <title>意见建议｜小兢会计</title>
+    <link rel="stylesheet" href="./feedback.css?v=20260921-1" />
+    <script src="./feedback.js?v=20260921-1" defer></script>
+  </head>
+  <body class="feedback-page">
+    <header class="feedback-header">
+      <a class="feedback-brand" href="/" aria-label="返回数豆科技官网">
+        <img src="./assets/sudo-logo-gray-source.png" alt="SUDO 数豆科技" />
+        <span></span>
+        <strong>小兢会计</strong>
+      </a>
+      <a class="feedback-back" href="./download.html">
+        返回产品页
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+      </a>
+    </header>
+
+    <main class="feedback-shell">
+      <section class="feedback-intro" aria-labelledby="feedback-title">
+        <div class="feedback-product-mark">
+          <img src="./assets/xiaojing-app-icon.png" alt="" />
+          <span>Product feedback</span>
+        </div>
+        <h1 id="feedback-title">告诉我们，<br />小兢哪里可以更好</h1>
+        <p>遇到问题或有新的想法，都可以直接告诉我们。每一条反馈都会进入产品评估。</p>
+        <div class="feedback-process" aria-label="反馈处理流程">
+          <div><span>01</span><strong>提交反馈</strong></div>
+          <div><span>02</span><strong>产品评估</strong></div>
+          <div><span>03</span><strong>采纳处理</strong></div>
+        </div>
+      </section>
+
+      <section class="feedback-panel" id="feedback-panel">
+        <div class="feedback-panel-heading">
+          <span>意见建议</span>
+          <strong>预计 2 分钟</strong>
+        </div>
+        <form id="feedback-form" novalidate>
+          <fieldset class="feedback-fieldset">
+            <legend>这是一条什么反馈？</legend>
+            <div class="feedback-type-options">
+              <label class="feedback-type-card">
+                <input type="radio" name="type" value="issue" checked />
+                <span class="feedback-type-icon" aria-hidden="true">!</span>
+                <span><strong>遇到问题</strong><small>功能异常、结果不对或使用受阻</small></span>
+              </label>
+              <label class="feedback-type-card">
+                <input type="radio" name="type" value="suggestion" />
+                <span class="feedback-type-icon feedback-type-icon-suggestion" aria-hidden="true">+</span>
+                <span><strong>产品建议</strong><small>希望增加功能或改善体验</small></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="feedback-field">
+            <span>请具体描述 <em>*</em></span>
+            <textarea name="description" maxlength="3000" rows="7" placeholder="请告诉我们发生了什么、你原本希望怎样，或你希望增加什么功能……" required></textarea>
+            <small><span id="description-count">0</span> / 3000</small>
+          </label>
+
+          <div class="feedback-field">
+            <span>添加截图 <b>选填</b></span>
+            <label class="feedback-upload" id="feedback-upload">
+              <input id="screenshot-input" type="file" accept="image/jpeg,image/png,image/webp" />
+              <span class="feedback-upload-symbol" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 16.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2.5" /><path d="m8 9 4-4 4 4" /><path d="M12 5v11" /></svg>
+              </span>
+              <span><strong>选择或拖入截图</strong><small>JPG、PNG、WebP，最大 5MB</small></span>
+            </label>
+            <div class="feedback-file" id="feedback-file" hidden>
+              <img id="feedback-preview" alt="待上传截图预览" />
+              <span><strong id="feedback-file-name"></strong><small id="feedback-file-size"></small></span>
+              <button id="feedback-file-remove" type="button" aria-label="移除截图" title="移除截图">×</button>
+            </div>
+          </div>
+
+          <label class="feedback-field feedback-name-field">
+            <span>你的姓名 <em>*</em></span>
+            <input name="name" type="text" maxlength="40" autocomplete="name" placeholder="怎么称呼你" required />
+          </label>
+
+          <p class="feedback-status" id="feedback-status" role="status" aria-live="polite"></p>
+          <button class="feedback-submit" id="feedback-submit" type="submit">
+            <span>提交反馈</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3-5-7-2Z" /><path d="m12 14 3-3" /></svg>
+          </button>
+          <p class="feedback-privacy">提交内容仅用于产品评估。请勿上传密码、密钥、身份证件或未经授权的业务数据。</p>
+        </form>
+      </section>
+
+      <section class="feedback-success" id="feedback-success" hidden aria-labelledby="feedback-success-title">
+        <span class="feedback-success-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg>
+        </span>
+        <p>提交成功</p>
+        <h2 id="feedback-success-title">谢谢你的认真反馈</h2>
+        <p id="feedback-success-message"></p>
+        <div class="feedback-ticket">
+          <span>反馈编号</span>
+          <strong id="feedback-ticket"></strong>
+        </div>
+        <div class="feedback-success-actions">
+          <button id="feedback-again" type="button">继续提交</button>
+          <a href="./download.html">返回产品页</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="feedback-footer">
+      <span>© 2026 瑞华云数豆科技（苏州）有限公司</span>
+      <nav aria-label="法律信息">
+        <a href="./privacy.html">隐私政策</a>
+        <a href="./terms.html">服务条款</a>
+      </nav>
+    </footer>
+  </body>
+</html>

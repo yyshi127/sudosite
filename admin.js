@@ -1,5 +1,9 @@
 const loginPanel = document.querySelector("#admin-login");
 const dashboard = document.querySelector("#admin-dashboard");
+const feedbackDashboard = document.querySelector("#feedback-admin-dashboard");
+const feedbackDashboardStatus = document.querySelector("#feedback-admin-dashboard-status");
+const loginTitle = document.querySelector("#admin-login-title");
+const viewTabs = [...document.querySelectorAll("[data-admin-view]")];
 const loginForm = document.querySelector("#admin-login-form");
 const passwordForm = document.querySelector("#admin-password-form");
 const settingsModal = document.querySelector("#admin-settings");
@@ -28,6 +32,8 @@ let currentFilter = "all";
 let selectedIds = new Set();
 let pendingDeleteIds = [];
 let adminSessionTimer = 0;
+let adminAuthenticated = false;
+let activeView = window.location.pathname === "/feedback-admin" ? "feedback" : "requests";
 const adminSessionTimeoutMs = 30 * 60 * 1000;
 
 function setStatus(element, message, type = "") {
@@ -43,11 +49,28 @@ function stopAdminIdleTimer() {
 function resetAdminIdleTimer() {
   stopAdminIdleTimer();
 
-  if (dashboard.hidden) return;
+  if (!adminAuthenticated) return;
 
   adminSessionTimer = window.setTimeout(() => {
     showLoginPanel("登录已过期，请重新登录", "error");
   }, adminSessionTimeoutMs);
+}
+
+function setAdminView(view, load = true) {
+  activeView = view;
+  viewTabs.forEach(tab => {
+    const selected = tab.dataset.adminView === view;
+    tab.classList.toggle("is-active", selected);
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+  });
+  loginTitle.textContent = view === "feedback" ? "查看问题反馈" : "查看预约线索";
+  dashboard.hidden = !adminAuthenticated || view !== "requests";
+  feedbackDashboard.hidden = !adminAuthenticated || view !== "feedback";
+
+  if (load && adminAuthenticated && view === "feedback") {
+    window.feedbackAdmin?.load();
+  }
 }
 
 function showLoginPanel(message = "登录已过期，请重新登录", type = "error") {
@@ -64,9 +87,11 @@ function showLoginPanel(message = "登录已过期，请重新登录", type = "e
   selectedIds = new Set();
   pendingDeleteIds = [];
   updateSelectionState();
+  adminAuthenticated = false;
   logoutButton.hidden = true;
   loginPanel.hidden = false;
-  dashboard.hidden = true;
+  window.feedbackAdmin?.clear();
+  setAdminView(activeView, false);
   setStatus(loginStatus, message, type);
 }
 
@@ -78,7 +103,7 @@ function handleAuthExpired(response) {
 }
 
 function markAdminActivity() {
-  if (!dashboard.hidden) {
+  if (adminAuthenticated) {
     resetAdminIdleTimer();
   }
 }
@@ -315,11 +340,12 @@ async function loadRequests() {
   }
 
   loginPanel.hidden = true;
-  dashboard.hidden = false;
+  adminAuthenticated = true;
   logoutButton.hidden = false;
   resetAdminIdleTimer();
   renderRows(result.rows || []);
   setStatus(dashboardStatus, "");
+  setAdminView(activeView);
 }
 
 async function updateVerification(button) {
@@ -389,6 +415,21 @@ loginForm.addEventListener("submit", async event => {
   } catch (error) {
     setStatus(loginStatus, "网络异常，请稍后重试", "error");
   }
+});
+
+viewTabs.forEach(tab => {
+  tab.addEventListener("click", () => setAdminView(tab.dataset.adminView));
+  tab.addEventListener("keydown", event => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const next = viewTabs.find(item => item !== tab);
+    next.focus();
+    next.click();
+  });
+});
+
+document.addEventListener("admin:session-expired", () => {
+  showLoginPanel("登录已过期，请重新登录", "error");
 });
 
 ["click", "input", "keydown", "change"].forEach(eventName => {
@@ -464,7 +505,7 @@ refreshButton.addEventListener("click", loadRequests);
 
 logoutButton.addEventListener("click", async () => {
   logoutButton.disabled = true;
-  setStatus(dashboardStatus, "正在退出登录...");
+  setStatus(activeView === "feedback" ? feedbackDashboardStatus : dashboardStatus, "正在退出登录...");
 
   try {
     await fetch("/api/admin/logout", {
@@ -479,15 +520,15 @@ logoutButton.addEventListener("click", async () => {
 });
 
 window.addEventListener("focus", () => {
-  if (!dashboard.hidden) {
-    loadRequests();
-  }
+  if (!adminAuthenticated) return;
+  if (activeView === "feedback") window.feedbackAdmin?.load();
+  else loadRequests();
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && !dashboard.hidden) {
-    loadRequests();
-  }
+  if (document.hidden || !adminAuthenticated) return;
+  if (activeView === "feedback") window.feedbackAdmin?.load();
+  else loadRequests();
 });
 
 csvExportLink.addEventListener("click", async event => {
@@ -613,4 +654,5 @@ passwordForm.addEventListener("submit", async event => {
   }
 });
 
+setAdminView(activeView, false);
 loadRequests();

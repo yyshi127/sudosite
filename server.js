@@ -18,13 +18,15 @@ app.set("trust proxy", "loopback");
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "127.0.0.1";
 const rootDir = __dirname;
-const dataDir = path.join(rootDir, "data");
+const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(rootDir, "data");
 const dbPath = path.join(dataDir, "demo-requests.sqlite");
+const feedbackUploadDir = path.join(dataDir, "feedback-uploads");
 const sessions = new Map();
 const sessionTtlMs = 30 * 60 * 1000;
 const sessionCookieMaxAgeSeconds = Math.floor(sessionTtlMs / 1000);
 
 fs.mkdirSync(dataDir, { recursive: true });
+fs.mkdirSync(feedbackUploadDir, { recursive: true });
 
 const db = new Database(dbPath);
 db.pragma("journal_mode = WAL");
@@ -43,6 +45,22 @@ db.prepare(`
   CREATE TABLE IF NOT EXISTS admin_settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
+  )
+`).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS feedback_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticket_no TEXT NOT NULL UNIQUE,
+    type TEXT NOT NULL CHECK (type IN ('issue', 'suggestion')),
+    description TEXT NOT NULL,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending_evaluation',
+    screenshot_file TEXT DEFAULT NULL,
+    screenshot_name TEXT DEFAULT NULL,
+    screenshot_mime TEXT DEFAULT NULL,
+    screenshot_size INTEGER DEFAULT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   )
 `).run();
 
@@ -144,9 +162,15 @@ const demoRequestRateLimiter = createRateLimiter({
   maxRequests: 5,
   errorMessage: "\u9884\u7ea6\u63d0\u4ea4\u8fc7\u4e8e\u9891\u7e41\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5",
 });
+const feedbackRateLimiter = createRateLimiter({
+  windowMs: 10 * 60 * 1000,
+  maxRequests: 6,
+  errorMessage: "提交过于频繁，请稍后再试",
+});
 
 app.use("/api/admin/login", adminLoginRateLimiter);
 app.use("/api/demo-requests", demoRequestRateLimiter);
+app.use("/api/feedback", feedbackRateLimiter, express.json({ limit: "8mb" }));
 app.use(express.json({ limit: "32kb" }));
 app.use((error, req, res, next) => {
   if (error && error.type === "entity.parse.failed") {
@@ -233,6 +257,94 @@ function normalizeIds(value) {
   return [...new Set(value.map(id => Number(id)).filter(id => Number.isInteger(id) && id > 0))];
 }
 
+const feedbackStatuses = {
+  issue: ["pending_evaluation", "evaluated_pending", "adopted", "resolved"],
+  suggestion: ["pending_evaluation", "evaluated_pending", "adopted", "launched"],
+};
+const screenshotExtensions = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+function validateScreenshot(value) {
+  if (value == null || value === "") return { data: null };
+
+  if (!value || typeof value !== "object") {
+    return { error: "截图格式不正确，请重新选择" };
+  }
+
+  const originalName = path.basename(normalizeText(value.name)).slice(0, 180);
+  const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(value.dataUrl || ""));
+
+  if (!match || !screenshotExtensions[match[1]]) {
+    return { error: "截图仅支持 JPG、PNG 或 WebP 格式" };
+  }
+
+  const buffer = Buffer.from(match[2], "base64");
+  if (!buffer.length || buffer.length > 5 * 1024 * 1024) {
+    return { error: "截图大小不能超过 5MB" };
+  }
+
+  const isJpeg = buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const isPng = buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"));
+  const isWebp = buffer.length >= 12 && buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+  const signatureMatches = (match[1] === "image/jpeg" && isJpeg)
+    || (match[1] === "image/png" && isPng)
+    || (match[1] === "image/webp" && isWebp);
+
+  if (!signatureMatches) {
+    return { error: "截图内容与文件格式不一致，请重新选择" };
+  }
+
+  return {
+    data: {
+      buffer,
+      mime: match[1],
+      extension: screenshotExtensions[match[1]],
+      originalName: originalName || `screenshot.${screenshotExtensions[match[1]]}`,
+    },
+  };
+}
+
+function validateFeedback(body) {
+  const type = normalizeText(body.type);
+  const description = normalizeText(body.description);
+  const name = normalizeText(body.name);
+
+  if (!feedbackStatuses[type]) {
+    return { error: "请选择问题或建议" };
+  }
+
+  if (description.length < 10) {
+    return { error: "请再详细描述一些，至少填写 10 个字" };
+  }
+
+  if (description.length > 3000) {
+    return { error: "描述不能超过 3000 个字" };
+  }
+
+  if (!name || name.length > 40) {
+    return { error: "请填写姓名，最多 40 个字" };
+  }
+
+  const screenshot = validateScreenshot(body.screenshot);
+  if (screenshot.error) return screenshot;
+
+  return { data: { type, description, name, screenshot: screenshot.data } };
+}
+
+function createFeedbackTicket() {
+  const day = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  let ticket;
+
+  do {
+    ticket = `XJ-${day}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+  } while (db.prepare("SELECT 1 FROM feedback_items WHERE ticket_no = ?").get(ticket));
+
+  return ticket;
+}
+
 function validateDemoRequest(body) {
   const name = normalizeText(body.name);
   const phone = normalizeText(body.phone);
@@ -286,6 +398,55 @@ app.post("/api/demo-requests", (req, res) => {
   `).run(result.data);
 
   res.json({ ok: true, id: info.lastInsertRowid });
+});
+
+app.post("/api/feedback", (req, res) => {
+  const result = validateFeedback(req.body || {});
+
+  if (result.error) {
+    res.status(400).json({ ok: false, error: result.error });
+    return;
+  }
+
+  const ticketNo = createFeedbackTicket();
+  const screenshot = result.data.screenshot;
+  const screenshotFile = screenshot ? `${crypto.randomUUID()}.${screenshot.extension}` : null;
+
+  try {
+    if (screenshot) {
+      fs.writeFileSync(path.join(feedbackUploadDir, screenshotFile), screenshot.buffer, { flag: "wx" });
+    }
+
+    db.prepare(`
+      INSERT INTO feedback_items (
+        ticket_no, type, description, name,
+        screenshot_file, screenshot_name, screenshot_mime, screenshot_size
+      ) VALUES (
+        @ticketNo, @type, @description, @name,
+        @screenshotFile, @screenshotName, @screenshotMime, @screenshotSize
+      )
+    `).run({
+      ticketNo,
+      type: result.data.type,
+      description: result.data.description,
+      name: result.data.name,
+      screenshotFile,
+      screenshotName: screenshot ? screenshot.originalName : null,
+      screenshotMime: screenshot ? screenshot.mime : null,
+      screenshotSize: screenshot ? screenshot.buffer.length : null,
+    });
+  } catch (error) {
+    if (screenshotFile) {
+      fs.rmSync(path.join(feedbackUploadDir, screenshotFile), { force: true });
+    }
+    throw error;
+  }
+
+  res.status(201).json({
+    ok: true,
+    ticket_no: ticketNo,
+    message: result.data.type === "issue" ? "问题已收到，我们会尽快评估" : "建议已收到，感谢你帮助小兢变得更好",
+  });
 });
 
 app.post("/api/admin/login", (req, res) => {
@@ -360,6 +521,79 @@ app.get("/api/admin/demo-requests", requireAdmin, (req, res) => {
   `).all();
 
   res.json({ ok: true, rows });
+});
+
+app.get("/api/admin/feedback", requireAdmin, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const rows = db.prepare(`
+    SELECT id, ticket_no, type, description, name, status,
+           screenshot_file IS NOT NULL AS has_screenshot,
+           screenshot_name, screenshot_size, created_at, updated_at
+    FROM feedback_items
+    ORDER BY datetime(created_at) DESC, id DESC
+  `).all();
+
+  res.json({ ok: true, rows });
+});
+
+app.patch("/api/admin/feedback/:id/status", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const status = normalizeText(req.body && req.body.status);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(400).json({ ok: false, error: "反馈 ID 无效" });
+    return;
+  }
+
+  const row = db.prepare("SELECT type FROM feedback_items WHERE id = ?").get(id);
+  if (!row) {
+    res.status(404).json({ ok: false, error: "反馈记录不存在" });
+    return;
+  }
+
+  if (!feedbackStatuses[row.type].includes(status)) {
+    res.status(400).json({ ok: false, error: "该状态不适用于当前反馈类型" });
+    return;
+  }
+
+  db.prepare(`
+    UPDATE feedback_items
+    SET status = ?, updated_at = datetime('now', 'localtime')
+    WHERE id = ?
+  `).run(status, id);
+
+  const updated = db.prepare("SELECT status, updated_at FROM feedback_items WHERE id = ?").get(id);
+  res.json({ ok: true, id, status: updated.status, updated_at: updated.updated_at });
+});
+
+app.get("/api/admin/feedback/:id/screenshot", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(400).json({ ok: false, error: "反馈 ID 无效" });
+    return;
+  }
+
+  const row = db.prepare(`
+    SELECT screenshot_file, screenshot_name, screenshot_mime
+    FROM feedback_items
+    WHERE id = ?
+  `).get(id);
+
+  if (!row || !row.screenshot_file) {
+    res.status(404).json({ ok: false, error: "截图不存在" });
+    return;
+  }
+
+  const filePath = path.join(feedbackUploadDir, row.screenshot_file);
+  if (!fs.existsSync(filePath)) {
+    res.status(404).json({ ok: false, error: "截图文件不存在" });
+    return;
+  }
+
+  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader("Content-Type", row.screenshot_mime);
+  res.setHeader("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(row.screenshot_name || row.screenshot_file)}`);
+  res.sendFile(filePath);
 });
 
 app.patch("/api/admin/demo-requests/:id/verification", requireAdmin, (req, res) => {
@@ -460,6 +694,15 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(rootDir, "admin.html"));
 });
 
+app.get("/feedback", (req, res) => {
+  res.sendFile(path.join(rootDir, "feedback.html"));
+});
+
+app.get("/feedback-admin", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendFile(path.join(rootDir, "admin.html"));
+});
+
 app.use((req, res, next) => {
   const blockedPaths = [
     "/data",
@@ -481,7 +724,7 @@ app.use(express.static(rootDir, {
   extensions: ["html"],
   index: "index.html",
   setHeaders(res, filePath) {
-    if (filePath.endsWith("admin.html") || filePath.endsWith("admin.js")) {
+    if (filePath.endsWith("admin.html") || filePath.endsWith("admin.js") || filePath.endsWith("feedback-admin.html") || filePath.endsWith("feedback-admin.js")) {
       res.setHeader("Cache-Control", "no-store");
     }
   },

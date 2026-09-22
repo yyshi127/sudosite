@@ -270,7 +270,34 @@ button {
   display: flex;
   margin-top: 32px;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
+}
+
+.download-feedback-link {
+  display: inline-flex;
+  min-height: 54px;
+  padding: 0 18px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(18, 164, 137, 0.28);
+  border-radius: 8px;
+  color: var(--brand-dark);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.download-feedback-link:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.download-feedback-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
 }
 
 .windows-download {
@@ -564,6 +591,10 @@ button {
     width: 100%;
   }
 
+  .download-feedback-link {
+    width: 100%;
+  }
+
   .compatibility {
     margin-top: 24px;
   }
@@ -576,6 +607,11 @@ button {
     justify-content: center;
     gap: 12px;
     text-align: center;
+  }
+
+  .download-footer nav {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 

@@ -1208,6 +1208,51 @@ body[data-lang="en"] .qr-card span {
   gap: 12px;
 }
 
+.admin-view-tabs {
+  display: inline-flex;
+  padding: 3px;
+  align-items: center;
+  border: 1px solid rgba(219, 233, 234, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.admin-view-tab {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #526970;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.admin-view-tab span {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.admin-view-tab.is-active {
+  background: rgba(18, 164, 137, 0.12);
+  color: var(--brand-deep);
+}
+
+.admin-view-tab:hover,
+.admin-view-tab:focus-visible {
+  color: var(--brand-deep);
+  outline: 2px solid rgba(18, 164, 137, 0.4);
+  outline-offset: -2px;
+}
+
+.admin-tab-label-short,
+.admin-tab-label-tiny {
+  display: none;
+}
+
 .admin-icon-button {
   display: inline-flex;
   align-items: center;
@@ -2172,6 +2217,33 @@ body[data-lang="en"] .qr-card span {
     height: 68px;
   }
 
+  .admin-header .brand img {
+    width: 96px;
+  }
+
+  .admin-header-actions {
+    gap: 8px;
+  }
+
+  .admin-tab-label-full {
+    display: none;
+  }
+
+  .admin-tab-label-short {
+    display: inline;
+  }
+
+  .admin-view-tab {
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .admin-icon-button {
+    width: 36px;
+    height: 36px;
+  }
+
   .admin-shell {
     padding: 32px 0;
   }
@@ -2251,5 +2323,19 @@ body[data-lang="en"] .qr-card span {
 
   .qr-card span {
     display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-header .brand img {
+    width: 76px;
+  }
+
+  .admin-tab-label-short {
+    display: none;
+  }
+
+  .admin-tab-label-tiny {
+    display: inline;
   }
 }
