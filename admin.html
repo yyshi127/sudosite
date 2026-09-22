@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUDO 数豆｜预约演示后台</title>
-    <link rel="stylesheet" href="./feedback.css?v=20260921-1" />
+    <link rel="stylesheet" href="./feedback.css?v=20260922-3" />
     <link rel="stylesheet" href="./styles.css?v=20260922-2" />
     <script src="./admin.js?v=20260922-1" defer></script>
-    <script src="./feedback-admin.js?v=20260922-1" defer></script>
+    <script src="./feedback-admin.js?v=20260922-3" defer></script>
   </head>
   <body class="admin-page">
     <header class="admin-header">
@@ -128,12 +128,39 @@
                 <option value="launched">已上线</option>
               </select>
             </label>
+            <label class="feedback-admin-select-all" title="全选当前筛选结果">
+              <input id="feedback-admin-select-all" type="checkbox" aria-label="全选当前筛选的反馈记录" />
+            </label>
+            <button class="feedback-admin-icon-button feedback-admin-delete-button" id="feedback-admin-bulk-delete" type="button" aria-label="删除选中反馈" title="删除选中反馈" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4.8A1.8 1.8 0 0 1 9.8 3h4.4A1.8 1.8 0 0 1 16 4.8V6M18.5 6l-.9 13.1A2 2 0 0 1 15.6 21H8.4a2 2 0 0 1-2-1.9L5.5 6M10 11v5m4-5v5" /></svg>
+            </button>
             <button class="feedback-admin-refresh" id="feedback-admin-refresh" type="button">刷新</button>
           </div>
         </div>
         <p class="feedback-admin-status" id="feedback-admin-dashboard-status" role="status" aria-live="polite"></p>
         <div class="feedback-admin-list" id="feedback-admin-list"></div>
         <div class="feedback-admin-empty" id="feedback-admin-empty" hidden>暂无符合条件的反馈</div>
+        <dialog class="feedback-admin-image-dialog" id="feedback-admin-image-dialog" aria-labelledby="feedback-admin-image-title">
+          <div class="feedback-admin-dialog-header">
+            <strong id="feedback-admin-image-title">反馈截图</strong>
+            <button type="button" data-feedback-image-close aria-label="关闭截图预览" title="关闭">×</button>
+          </div>
+          <p class="feedback-admin-image-status" id="feedback-admin-image-status" role="status"></p>
+          <img id="feedback-admin-image" alt="" hidden />
+        </dialog>
+        <dialog class="feedback-admin-delete-dialog" id="feedback-admin-delete-dialog" aria-labelledby="feedback-admin-delete-title">
+          <div class="feedback-admin-dialog-header">
+            <strong id="feedback-admin-delete-title">确认删除反馈</strong>
+            <button type="button" data-feedback-delete-close aria-label="关闭删除确认" title="关闭">×</button>
+          </div>
+          <p id="feedback-admin-delete-intro"></p>
+          <ul id="feedback-admin-delete-list"></ul>
+          <p class="feedback-admin-status" id="feedback-admin-delete-status" role="status" aria-live="polite"></p>
+          <div class="feedback-admin-delete-actions">
+            <button type="button" data-feedback-delete-close>取消</button>
+            <button type="button" id="feedback-admin-confirm-delete">确认删除</button>
+          </div>
+        </dialog>
       </section>
 
       <div class="admin-settings-modal" id="admin-settings" aria-hidden="true">

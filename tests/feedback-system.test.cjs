@@ -72,6 +72,14 @@ async function jsonRequest(url, options = {}) {
 
     const unauthorized = await jsonRequest("/api/admin/feedback");
     assert.equal(unauthorized.response.status, 401);
+    const unauthorizedDelete = await jsonRequest("/api/admin/feedback/1", { method: "DELETE" });
+    assert.equal(unauthorizedDelete.response.status, 401);
+    const unauthorizedBulkDelete = await jsonRequest("/api/admin/feedback/bulk-delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1] }),
+    });
+    assert.equal(unauthorizedBulkDelete.response.status, 401);
 
     const login = await fetch(`${baseUrl}/api/admin/login`, {
       method: "POST",
@@ -82,6 +90,16 @@ async function jsonRequest(url, options = {}) {
     const cookie = login.headers.get("set-cookie").split(";")[0];
     const adminHeaders = { Cookie: cookie };
 
+    const invalidDelete = await jsonRequest("/api/admin/feedback/not-an-id", { method: "DELETE", headers: adminHeaders });
+    assert.equal(invalidDelete.response.status, 400);
+    const missingDelete = await jsonRequest("/api/admin/feedback/999999", { method: "DELETE", headers: adminHeaders });
+    assert.equal(missingDelete.response.status, 404);
+    const emptyBulkDelete = await jsonRequest("/api/admin/feedback/bulk-delete", {
+      method: "POST",
+      headers: { ...adminHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [] }),
+    });
+    assert.equal(emptyBulkDelete.response.status, 400);
     const records = await jsonRequest("/api/admin/feedback", { headers: adminHeaders });
     assert.equal(records.response.status, 200);
     assert.equal(records.body.rows.length, 2);
@@ -89,6 +107,12 @@ async function jsonRequest(url, options = {}) {
     const suggestionRow = records.body.rows.find(row => row.type === "suggestion");
     assert.equal(issueRow.has_screenshot, 1);
     assert.equal(suggestionRow.has_screenshot, 0);
+    const partialBulkDelete = await jsonRequest("/api/admin/feedback/bulk-delete", {
+      method: "POST",
+      headers: { ...adminHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [issueRow.id, 999999] }),
+    });
+    assert.equal(partialBulkDelete.response.status, 404);
 
     const imageResponse = await fetch(`${baseUrl}/api/admin/feedback/${issueRow.id}/screenshot`, { headers: adminHeaders });
     assert.equal(imageResponse.status, 200);
@@ -151,6 +175,19 @@ async function jsonRequest(url, options = {}) {
     await adminPage.locator("#feedback-admin-login-form button").click();
     await adminPage.locator(".feedback-admin-item").first().waitFor();
     assert.equal(await adminPage.locator(".feedback-admin-item").count(), 3);
+    const pageCount = context.pages().length;
+    await adminPage.locator(`.feedback-admin-item[data-id="${issueRow.id}"] .feedback-admin-preview`).click();
+    await adminPage.locator("#feedback-admin-image-dialog[open] img:not([hidden])").waitFor();
+    assert.equal(context.pages().length, pageCount);
+    assert.match(await adminPage.locator("#feedback-admin-image").getAttribute("src"), /^blob:/);
+    await adminPage.screenshot({ path: path.join(root, "test-results", "feedback-image-dialog.png") });
+    await adminPage.setViewportSize({ width: 390, height: 844 });
+    const imageBounds = await adminPage.locator("#feedback-admin-image-dialog").boundingBox();
+    assert.equal(imageBounds.x >= 0 && imageBounds.x + imageBounds.width <= 390, true);
+    await adminPage.screenshot({ path: path.join(root, "test-results", "feedback-image-dialog-mobile.png") });
+    await adminPage.locator("[data-feedback-image-close]").click();
+    assert.equal(await adminPage.locator("#feedback-admin-image-dialog").isVisible(), false);
+    await adminPage.setViewportSize({ width: 1366, height: 900 });
     await adminPage.screenshot({ path: path.join(root, "test-results", "feedback-admin-desktop.png"), fullPage: true });
 
     const unifiedPage = await context.newPage();
@@ -206,6 +243,42 @@ async function jsonRequest(url, options = {}) {
     assert.equal(directPage.url(), `${baseUrl}/feedback-admin`);
     assert.equal(await directPage.locator("#admin-tab-requests").getAttribute("aria-selected"), "true");
     assert.equal(await directPage.locator("#admin-dashboard").isVisible(), true);
+
+    await directPage.locator("#admin-tab-feedback").click();
+    await directPage.locator(".feedback-admin-item").first().waitFor();
+    const uploadDir = path.join(testDir, "feedback-uploads");
+    assert.equal(fs.readdirSync(uploadDir).length, 2);
+    await directPage.locator(`.feedback-admin-item[data-id="${suggestionRow.id}"] .feedback-admin-row-select`).check();
+    assert.equal(await directPage.locator("#feedback-admin-bulk-delete").isEnabled(), true);
+    await directPage.locator('[data-type-filter="issue"]').click();
+    assert.equal(await directPage.locator("#feedback-admin-bulk-delete").isDisabled(), true);
+    await directPage.locator('[data-type-filter="all"]').click();
+
+    const issueCard = directPage.locator(`.feedback-admin-item[data-id="${issueRow.id}"]`);
+    await issueCard.locator(".feedback-admin-delete").click();
+    await directPage.locator("#feedback-admin-delete-dialog[open]").waitFor();
+    assert.match(await directPage.locator("#feedback-admin-delete-list").textContent(), new RegExp(issue.body.ticket_no));
+    await directPage.screenshot({ path: path.join(root, "test-results", "feedback-delete-dialog.png") });
+    await directPage.locator("[data-feedback-delete-close]").last().click();
+    assert.equal(await issueCard.count(), 1);
+    await issueCard.locator(".feedback-admin-delete").click();
+    await directPage.locator("#feedback-admin-confirm-delete").click();
+    await directPage.locator("#feedback-admin-dashboard-status[data-type='success']").waitFor();
+    assert.equal(await issueCard.count(), 0);
+    assert.equal(fs.readdirSync(uploadDir).length, 1);
+    const deletedImage = await fetch(`${baseUrl}/api/admin/feedback/${issueRow.id}/screenshot`, { headers: adminHeaders });
+    assert.equal(deletedImage.status, 404);
+
+    await directPage.locator("#feedback-admin-select-all").check();
+    assert.match(await directPage.locator("#feedback-admin-count").textContent(), /已选 2 条/);
+    await directPage.locator("#feedback-admin-bulk-delete").click();
+    await directPage.locator("#feedback-admin-confirm-delete").click();
+    await directPage.locator("#feedback-admin-empty:not([hidden])").waitFor();
+    assert.equal(fs.readdirSync(uploadDir).length, 0);
+    await directPage.locator("#feedback-admin-refresh").click();
+    await directPage.locator("#feedback-admin-empty:not([hidden])").waitFor();
+    const afterDelete = await jsonRequest("/api/admin/feedback", { headers: adminHeaders });
+    assert.equal(afterDelete.body.rows.length, 0);
 
     const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await mobilePage.goto(`${baseUrl}/feedback.html`, { waitUntil: "networkidle" });

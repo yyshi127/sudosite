@@ -1058,6 +1058,59 @@ a {
   background: #fff;
 }
 
+.feedback-admin-select-all,
+.feedback-admin-icon-button {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.feedback-admin-select-all {
+  cursor: pointer;
+}
+
+.feedback-admin-select-all input,
+.feedback-admin-select input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+
+.feedback-admin-icon-button {
+  color: #697d83;
+  cursor: pointer;
+}
+
+.feedback-admin-icon-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.feedback-admin-delete-button:hover:not(:disabled),
+.feedback-admin-delete-button:focus-visible {
+  color: #b42318;
+  border-color: #efc9c4;
+  background: #fff7f6;
+}
+
+.feedback-admin-icon-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
 .feedback-admin-status {
   min-height: 20px;
   margin: 0 0 12px;
@@ -1086,6 +1139,10 @@ a {
   box-shadow: 0 10px 30px rgba(31, 78, 86, 0.045);
 }
 
+.feedback-admin-item.is-selected {
+  border-color: rgba(18, 164, 137, 0.58);
+}
+
 .feedback-admin-item-top,
 .feedback-admin-item-footer {
   display: flex;
@@ -1105,6 +1162,28 @@ a {
   align-items: center;
   gap: 11px;
   min-width: 0;
+}
+
+.feedback-admin-select {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 24px;
+}
+
+.feedback-admin-item-actions {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.feedback-admin-item-actions .feedback-admin-icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
 }
 
 .feedback-admin-identity strong {
@@ -1197,13 +1276,17 @@ a {
   font-size: 12px;
 }
 
-.feedback-admin-attachment a {
+.feedback-admin-attachment button {
+  padding: 0;
   color: var(--brand-deep);
   font-weight: 700;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
-.feedback-admin-attachment a:hover,
-.feedback-admin-attachment a:focus-visible {
+.feedback-admin-attachment button:hover,
+.feedback-admin-attachment button:focus-visible {
   text-decoration: underline;
   outline: none;
 }
@@ -1250,6 +1333,123 @@ a {
   border: 1px dashed rgba(18, 164, 137, 0.25);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.72);
+}
+
+.feedback-admin-image-dialog,
+.feedback-admin-delete-dialog {
+  max-height: calc(100dvh - 32px);
+  padding: 20px;
+  color: var(--heading);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(9, 37, 43, 0.22);
+}
+
+.feedback-admin-image-dialog::backdrop,
+.feedback-admin-delete-dialog::backdrop {
+  background: rgba(10, 29, 34, 0.66);
+}
+
+.feedback-admin-image-dialog {
+  width: min(1100px, calc(100vw - 32px));
+}
+
+.feedback-admin-delete-dialog {
+  width: min(460px, calc(100vw - 32px));
+}
+
+.feedback-admin-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.feedback-admin-dialog-header strong {
+  min-width: 0;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.feedback-admin-dialog-header button {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  color: #61777e;
+  font-size: 24px;
+  line-height: 1;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.feedback-admin-image-dialog img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 120px);
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.feedback-admin-image-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.feedback-admin-image-status[data-type="error"] {
+  color: #b42318;
+}
+
+.feedback-admin-delete-dialog > p {
+  margin: 0 0 14px;
+  color: #667b81;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.feedback-admin-delete-dialog ul {
+  max-height: 180px;
+  margin: 0 0 16px;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.feedback-admin-delete-dialog li {
+  padding: 8px 0;
+  color: #344e56;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+}
+
+.feedback-admin-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.feedback-admin-delete-actions button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer;
+}
+
+#feedback-admin-confirm-delete {
+  color: #fff;
+  border-color: #b42318;
+  background: #b42318;
+}
+
+#feedback-admin-confirm-delete:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 @media (max-width: 900px) {
@@ -1304,10 +1504,14 @@ a {
     flex: 1;
   }
 
-  .feedback-admin-item-top,
   .feedback-admin-item-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .feedback-admin-item-top {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .feedback-admin-identity {

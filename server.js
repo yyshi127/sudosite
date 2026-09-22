@@ -596,6 +596,62 @@ app.get("/api/admin/feedback/:id/screenshot", requireAdmin, (req, res) => {
   res.sendFile(filePath);
 });
 
+function deleteFeedbackByIds(ids) {
+  const placeholders = ids.map(() => "?").join(",");
+  const records = db.prepare(`
+    SELECT screenshot_file FROM feedback_items WHERE id IN (${placeholders})
+  `).all(...ids);
+  if (records.length !== ids.length) return { deleted: 0, screenshot_cleanup_failed: 0 };
+
+  const deleted = db.prepare(`DELETE FROM feedback_items WHERE id IN (${placeholders})`).run(...ids).changes;
+  let screenshotCleanupFailed = 0;
+  records.forEach(row => {
+    if (!row.screenshot_file) return;
+    if (path.basename(row.screenshot_file) !== row.screenshot_file) {
+      screenshotCleanupFailed += 1;
+      return;
+    }
+    try {
+      fs.rmSync(path.join(feedbackUploadDir, row.screenshot_file), { force: true });
+    } catch (error) {
+      screenshotCleanupFailed += 1;
+      console.error("反馈截图清理失败:", error);
+    }
+  });
+
+  return { deleted, screenshot_cleanup_failed: screenshotCleanupFailed };
+}
+
+app.post("/api/admin/feedback/bulk-delete", requireAdmin, (req, res) => {
+  const ids = normalizeIds(req.body && req.body.ids);
+  if (!ids.length) {
+    res.status(400).json({ ok: false, error: "请选择要删除的反馈记录" });
+    return;
+  }
+
+  const result = deleteFeedbackByIds(ids);
+  if (!result.deleted) {
+    res.status(404).json({ ok: false, error: "反馈记录不存在" });
+    return;
+  }
+  res.json({ ok: true, ...result });
+});
+
+app.delete("/api/admin/feedback/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(400).json({ ok: false, error: "反馈 ID 无效" });
+    return;
+  }
+
+  const result = deleteFeedbackByIds([id]);
+  if (!result.deleted) {
+    res.status(404).json({ ok: false, error: "反馈记录不存在" });
+    return;
+  }
+  res.json({ ok: true, ...result });
+});
+
 app.patch("/api/admin/demo-requests/:id/verification", requireAdmin, (req, res) => {
   const id = Number(req.params.id);
   const verified = req.body && req.body.verified;
