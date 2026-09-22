@@ -121,7 +121,12 @@ form.addEventListener("submit", async event => {
         screenshot: selectedScreenshot,
       }),
     });
-    const result = await response.json().catch(() => ({ ok: false, error: "服务暂时不可用，请稍后重试" }));
+    const result = await response.json().catch(() => ({
+      ok: false,
+      error: response.status === 413
+        ? "上传内容过大，请选择 5MB 以内的截图重试"
+        : "服务暂时不可用，请稍后重试",
+    }));
 
     if (!response.ok || !result.ok) {
       setStatus(result.error || "提交失败，请稍后重试", "error");

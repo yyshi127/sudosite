@@ -131,6 +131,14 @@ async function jsonRequest(url, options = {}) {
     await page.locator('textarea[name="description"]').fill("建议在任务执行完成后显示一份清晰的结果摘要。 ");
     await page.locator('input[name="name"]').fill("浏览器测试");
     await page.locator("#screenshot-input").setInputFiles(screenshotPath);
+    await page.route("**/api/feedback", route => route.fulfill({
+      status: 413,
+      contentType: "text/html",
+      body: "<h1>413 Request Entity Too Large</h1>",
+    }), { times: 1 });
+    await page.locator("#feedback-submit").click();
+    await page.waitForFunction(() => document.querySelector("#feedback-status").textContent.includes("上传内容过大"));
+    assert.equal(await page.locator("#feedback-success").isHidden(), true);
     await page.locator("#feedback-submit").click();
     await page.locator("#feedback-success:not([hidden])").waitFor();
     assert.match(await page.locator("#feedback-ticket").textContent(), /^XJ-/);
