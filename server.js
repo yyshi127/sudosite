@@ -4,6 +4,7 @@ const path = require("node:path");
 
 const Database = require("better-sqlite3");
 const express = require("express");
+const sharp = require("sharp");
 
 const bootstrapAdminPassword = process.env.ADMIN_PASSWORD;
 
@@ -267,7 +268,7 @@ const screenshotExtensions = {
   "image/webp": "webp",
 };
 
-function validateScreenshot(value) {
+async function validateScreenshot(value) {
   if (value == null || value === "") return { data: null };
 
   if (!value || typeof value !== "object") {
@@ -297,9 +298,25 @@ function validateScreenshot(value) {
     return { error: "截图内容与文件格式不一致，请重新选择" };
   }
 
+  let normalizedBuffer;
+  try {
+    const image = sharp(buffer, { failOn: "warning", limitInputPixels: 20_000_000 });
+    const metadata = await image.metadata();
+    if (metadata.format !== match[1].slice(6)) {
+      return { error: "截图内容与文件格式不一致，请重新选择" };
+    }
+    normalizedBuffer = await image.toFormat(metadata.format).toBuffer();
+  } catch (error) {
+    return { error: "截图文件已损坏或分辨率过大，请重新选择" };
+  }
+
+  if (normalizedBuffer.length > 5 * 1024 * 1024) {
+    return { error: "截图处理后大小不能超过 5MB" };
+  }
+
   return {
     data: {
-      buffer,
+      buffer: normalizedBuffer,
       mime: match[1],
       extension: screenshotExtensions[match[1]],
       originalName: originalName || `screenshot.${screenshotExtensions[match[1]]}`,
@@ -307,7 +324,7 @@ function validateScreenshot(value) {
   };
 }
 
-function validateFeedback(body) {
+async function validateFeedback(body) {
   const type = normalizeText(body.type);
   const description = normalizeText(body.description);
   const name = normalizeText(body.name);
@@ -328,7 +345,7 @@ function validateFeedback(body) {
     return { error: "请填写姓名，最多 40 个字" };
   }
 
-  const screenshot = validateScreenshot(body.screenshot);
+  const screenshot = await validateScreenshot(body.screenshot);
   if (screenshot.error) return screenshot;
 
   return { data: { type, description, name, screenshot: screenshot.data } };
@@ -400,8 +417,8 @@ app.post("/api/demo-requests", (req, res) => {
   res.json({ ok: true, id: info.lastInsertRowid });
 });
 
-app.post("/api/feedback", (req, res) => {
-  const result = validateFeedback(req.body || {});
+app.post("/api/feedback", async (req, res) => {
+  const result = await validateFeedback(req.body || {});
 
   if (result.error) {
     res.status(400).json({ ok: false, error: result.error });

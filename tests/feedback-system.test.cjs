@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { chromium } = require("playwright");
+const sharp = require("sharp");
 
 const root = path.resolve(__dirname, "..");
 const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "sudo-feedback-test-"));
@@ -43,10 +44,28 @@ async function jsonRequest(url, options = {}) {
     await waitForServer();
     const screenshotPath = path.join(root, "assets", "xiaojing-app-icon.png");
     const screenshotBuffer = fs.readFileSync(screenshotPath);
+    const appendedPayload = Buffer.from("SUDO_TEST_TRAILING_PAYLOAD");
+    const jpegBuffer = await sharp(screenshotBuffer).jpeg().toBuffer();
     const screenshot = {
       name: "problem.png",
-      dataUrl: `data:image/png;base64,${screenshotBuffer.toString("base64")}`,
+      dataUrl: `data:image/png;base64,${Buffer.concat([screenshotBuffer, appendedPayload]).toString("base64")}`,
     };
+
+    for (const [name, mime, bytes] of [
+      ["broken.jpg", "image/jpeg", jpegBuffer.subarray(0, Math.floor(jpegBuffer.length / 2))],
+      ["broken.png", "image/png", Buffer.from("89504e470d0a1a0a00000000", "hex")],
+    ]) {
+      const invalidImage = await jsonRequest("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "issue", description: "Screenshot should be rejected because it is corrupt.", name: "Test user",
+          screenshot: { name, dataUrl: `data:${mime};base64,${bytes.toString("base64")}` },
+        }),
+      });
+      assert.equal(invalidImage.response.status, 400);
+      assert.match(invalidImage.body.error, /截图/);
+    }
 
     const issue = await jsonRequest("/api/feedback", {
       method: "POST",
@@ -116,7 +135,13 @@ async function jsonRequest(url, options = {}) {
 
     const imageResponse = await fetch(`${baseUrl}/api/admin/feedback/${issueRow.id}/screenshot`, { headers: adminHeaders });
     assert.equal(imageResponse.status, 200);
-    assert.deepEqual(Buffer.from(await imageResponse.arrayBuffer()), screenshotBuffer);
+    const storedImage = Buffer.from(await imageResponse.arrayBuffer());
+    assert.equal((await sharp(storedImage).metadata()).format, "png");
+    assert.equal(storedImage.includes(appendedPayload), false);
+    assert.deepEqual(
+      await sharp(storedImage).raw().toBuffer(),
+      await sharp(screenshotBuffer).raw().toBuffer()
+    );
 
     const invalidTransition = await jsonRequest(`/api/admin/feedback/${issueRow.id}/status`, {
       method: "PATCH",
@@ -201,6 +226,10 @@ async function jsonRequest(url, options = {}) {
     await unifiedPage.locator(".feedback-admin-item").first().waitFor();
     assert.equal(unifiedPage.url(), adminUrl);
     assert.equal(await unifiedPage.locator(".feedback-admin-item").count(), 3);
+    await unifiedPage.reload({ waitUntil: "networkidle" });
+    await unifiedPage.locator("#feedback-admin-dashboard:not([hidden])").waitFor();
+    assert.equal(await unifiedPage.locator("#admin-tab-feedback").getAttribute("aria-selected"), "true");
+    assert.equal(await unifiedPage.locator(".feedback-admin-item").count(), 3);
 
     const integratedIssue = unifiedPage.locator(`.feedback-admin-item[data-id="${issueRow.id}"]`);
     await integratedIssue.locator("select").selectOption("adopted");
@@ -216,10 +245,13 @@ async function jsonRequest(url, options = {}) {
     assert.equal(await unifiedPage.locator(".feedback-admin-item").count(), 1);
     await unifiedPage.locator("#admin-tab-requests").click();
     assert.equal(await unifiedPage.locator("#admin-dashboard").isVisible(), true);
+    await unifiedPage.reload({ waitUntil: "networkidle" });
+    await unifiedPage.locator("#admin-dashboard:not([hidden])").waitFor();
+    assert.equal(await unifiedPage.locator("#admin-tab-requests").getAttribute("aria-selected"), "true");
     await unifiedPage.locator("#admin-tab-feedback").click();
     await unifiedPage.locator(".feedback-admin-item").first().waitFor();
     assert.equal(unifiedPage.url(), adminUrl);
-    assert.equal(await unifiedPage.locator(".feedback-admin-item").count(), 1);
+    assert.equal(await unifiedPage.locator(".feedback-admin-item").count(), 3);
     await unifiedPage.screenshot({ path: path.join(root, "test-results", "admin-integrated-feedback-desktop.png"), fullPage: true });
 
     for (const width of [390, 320]) {
@@ -243,6 +275,9 @@ async function jsonRequest(url, options = {}) {
     assert.equal(directPage.url(), `${baseUrl}/feedback-admin`);
     assert.equal(await directPage.locator("#admin-tab-requests").getAttribute("aria-selected"), "true");
     assert.equal(await directPage.locator("#admin-dashboard").isVisible(), true);
+    await directPage.reload({ waitUntil: "networkidle" });
+    await directPage.locator("#admin-dashboard:not([hidden])").waitFor();
+    assert.equal(await directPage.locator("#admin-tab-requests").getAttribute("aria-selected"), "true");
 
     await directPage.locator("#admin-tab-feedback").click();
     await directPage.locator(".feedback-admin-item").first().waitFor();

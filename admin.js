@@ -33,7 +33,10 @@ let selectedIds = new Set();
 let pendingDeleteIds = [];
 let adminSessionTimer = 0;
 let adminAuthenticated = false;
-let activeView = window.location.pathname === "/feedback-admin" ? "feedback" : "requests";
+const savedView = window.sessionStorage.getItem("sudo-admin-view");
+let activeView = savedView === "feedback" || savedView === "requests"
+  ? savedView
+  : window.location.pathname === "/feedback-admin" ? "feedback" : "requests";
 const adminSessionTimeoutMs = 30 * 60 * 1000;
 
 function setStatus(element, message, type = "") {
@@ -58,6 +61,7 @@ function resetAdminIdleTimer() {
 
 function setAdminView(view, load = true) {
   activeView = view;
+  window.sessionStorage.setItem("sudo-admin-view", view);
   viewTabs.forEach(tab => {
     const selected = tab.dataset.adminView === view;
     tab.classList.toggle("is-active", selected);
