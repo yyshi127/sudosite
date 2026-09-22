@@ -65,7 +65,28 @@ async function jsonRequest(url, options = {}) {
       });
       assert.equal(invalidImage.response.status, 400);
       assert.match(invalidImage.body.error, /截图/);
+      assert.equal(invalidImage.body.field, "screenshot");
     }
+
+    for (const [body, field] of [
+      [{ type: "other", description: "A detailed description", name: "User" }, "type"],
+      [{ type: "issue", description: "Too short", name: "User" }, "description"],
+      [{ type: "issue", description: "x".repeat(3001), name: "User" }, "description"],
+      [{ type: "issue", description: "A detailed description", name: "" }, "name"],
+      [{ type: "issue", description: "A detailed description", name: "x".repeat(41) }, "name"],
+      [{ type: "issue", description: "A detailed description", name: "User", screenshot: { name: "bad.svg", dataUrl: "data:image/svg+xml;base64,PHN2Zz4=" } }, "screenshot"],
+    ]) {
+      const invalid = await jsonRequest("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      assert.equal(invalid.response.status, 400);
+      assert.equal(invalid.body.field, field);
+    }
+
+    const getFeedback = await fetch(`${baseUrl}/api/feedback`);
+    assert.equal(getFeedback.status, 404);
 
     const issue = await jsonRequest("/api/feedback", {
       method: "POST",
@@ -74,6 +95,13 @@ async function jsonRequest(url, options = {}) {
     });
     assert.equal(issue.response.status, 201);
     assert.match(issue.body.ticket_no, /^XJ-\d{8}-[A-F0-9]{6}$/);
+    const repeatedIssue = await jsonRequest("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "issue", description: "打开工作区后任务没有继续执行，请帮助检查。", name: "测试用户", screenshot }),
+    });
+    assert.equal(repeatedIssue.response.status, 200);
+    assert.equal(repeatedIssue.body.ticket_no, issue.body.ticket_no);
 
     const suggestion = await jsonRequest("/api/feedback", {
       method: "POST",
@@ -102,10 +130,11 @@ async function jsonRequest(url, options = {}) {
 
     const login = await fetch(`${baseUrl}/api/admin/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Forwarded-Proto": "https" },
       body: JSON.stringify({ password }),
     });
     assert.equal(login.status, 200);
+    assert.match(login.headers.get("set-cookie"), /; Secure(?:;|$)/);
     const cookie = login.headers.get("set-cookie").split(";")[0];
     const adminHeaders = { Cookie: cookie };
 
@@ -171,10 +200,25 @@ async function jsonRequest(url, options = {}) {
     const context = await browser.newContext({ viewport: { width: 1366, height: 900 } });
     const page = await context.newPage();
     const pageErrors = [];
+    const cspErrors = [];
     page.on("pageerror", error => pageErrors.push(error.message));
+    page.on("console", message => {
+      if (message.type() === "error" && /content security policy|refused to/i.test(message.text())) cspErrors.push(message.text());
+    });
     await page.goto(`${baseUrl}/feedback.html`, { waitUntil: "networkidle" });
+    assert.equal((await fetch(`${baseUrl}/feedback.html`)).headers.get("x-powered-by"), null);
+    assert.match((await fetch(`${baseUrl}/feedback.html`)).headers.get("content-security-policy"), /object-src 'none'/);
     fs.mkdirSync(path.join(root, "test-results"), { recursive: true });
     await page.screenshot({ path: path.join(root, "test-results", "feedback-form-desktop.png"), fullPage: true });
+    await page.locator('textarea[name="description"]').fill("short");
+    await page.locator("#feedback-submit").click();
+    assert.equal(await page.locator('textarea[name="description"]').getAttribute("aria-invalid"), "true");
+    assert.equal(await page.locator("#feedback-description-error").isVisible(), true);
+    await page.locator('textarea[name="description"]').fill("A complete description for feedback.");
+    assert.equal(await page.locator("#feedback-description-error").isHidden(), true);
+    await page.locator("#feedback-submit").click();
+    assert.equal(await page.locator('input[name="name"]').getAttribute("aria-invalid"), "true");
+    assert.equal(await page.locator("#feedback-name-error").isVisible(), true);
     await page.locator('label:has(input[value="suggestion"])').click();
     assert.equal(await page.locator('input[value="suggestion"]').isChecked(), true);
     await page.locator('textarea[name="description"]').fill("建议在任务执行完成后显示一份清晰的结果摘要。 ");
@@ -188,13 +232,27 @@ async function jsonRequest(url, options = {}) {
     await page.locator("#feedback-submit").click();
     await page.waitForFunction(() => document.querySelector("#feedback-status").textContent.includes("上传内容过大"));
     assert.equal(await page.locator("#feedback-success").isHidden(), true);
+    await page.route("**/api/feedback", route => route.fulfill({
+      status: 429,
+      headers: { "Retry-After": "2" },
+      contentType: "application/json",
+      body: JSON.stringify({ ok: false, error: "提交过于频繁，请稍后再试" }),
+    }), { times: 1 });
+    await page.locator("#feedback-submit").click();
+    await page.waitForFunction(() => document.querySelector("#feedback-submit").disabled);
+    assert.match(await page.locator("#feedback-status").textContent(), /秒后/);
+    await page.waitForFunction(() => !document.querySelector("#feedback-submit").disabled);
     await page.locator("#feedback-submit").click();
     await page.locator("#feedback-success:not([hidden])").waitFor();
     assert.match(await page.locator("#feedback-ticket").textContent(), /^XJ-/);
     assert.deepEqual(pageErrors, []);
+    assert.deepEqual(cspErrors, []);
     await page.screenshot({ path: path.join(root, "test-results", "feedback-desktop.png"), fullPage: true });
 
     const adminPage = await context.newPage();
+    adminPage.on("console", message => {
+      if (message.type() === "error" && /content security policy|refused to/i.test(message.text())) cspErrors.push(message.text());
+    });
     await adminPage.goto(`${baseUrl}/feedback-admin.html`, { waitUntil: "networkidle" });
     await adminPage.locator('input[name="password"]').fill(password);
     await adminPage.locator("#feedback-admin-login-form button").click();
@@ -203,6 +261,7 @@ async function jsonRequest(url, options = {}) {
     const pageCount = context.pages().length;
     await adminPage.locator(`.feedback-admin-item[data-id="${issueRow.id}"] .feedback-admin-preview`).click();
     await adminPage.locator("#feedback-admin-image-dialog[open] img:not([hidden])").waitFor();
+    assert.deepEqual(cspErrors, []);
     assert.equal(context.pages().length, pageCount);
     assert.match(await adminPage.locator("#feedback-admin-image").getAttribute("src"), /^blob:/);
     await adminPage.screenshot({ path: path.join(root, "test-results", "feedback-image-dialog.png") });
@@ -314,6 +373,51 @@ async function jsonRequest(url, options = {}) {
     await directPage.locator("#feedback-admin-empty:not([hidden])").waitFor();
     const afterDelete = await jsonRequest("/api/admin/feedback", { headers: adminHeaders });
     assert.equal(afterDelete.body.rows.length, 0);
+
+    const rateHeaders = { "Content-Type": "application/json", "X-Forwarded-For": "203.0.113.9" };
+    for (let index = 0; index < 60; index += 1) {
+      assert.equal((await fetch(`${baseUrl}/api/feedback`, { headers: rateHeaders })).status, 404);
+    }
+    for (let index = 0; index < 8; index += 1) {
+      const invalid = await jsonRequest("/api/feedback", {
+        method: "POST", headers: rateHeaders,
+        body: JSON.stringify({ type: "issue", description: "short", name: "Rate test" }),
+      });
+      assert.equal(invalid.response.status, 400);
+    }
+    const rateIds = [];
+    for (let index = 0; index < 30; index += 1) {
+      const submitted = await jsonRequest("/api/feedback", {
+        method: "POST", headers: rateHeaders,
+        body: JSON.stringify({ type: "issue", description: `Rate test submission ${index} is unique.`, name: "Rate test" }),
+      });
+      assert.equal(submitted.response.status, 201);
+      rateIds.push(submitted.body.ticket_no);
+    }
+    const limited = await jsonRequest("/api/feedback", {
+      method: "POST", headers: rateHeaders,
+      body: JSON.stringify({ type: "issue", description: "Rate test submission after the success quota.", name: "Rate test" }),
+    });
+    assert.equal(limited.response.status, 429);
+    assert.ok(Number(limited.response.headers.get("retry-after")) > 0);
+    const rateRows = (await jsonRequest("/api/admin/feedback", { headers: adminHeaders })).body.rows;
+    const idsToDelete = rateRows.filter(row => rateIds.includes(row.ticket_no)).map(row => row.id);
+    assert.equal(idsToDelete.length, 30);
+    const cleaned = await jsonRequest("/api/admin/feedback/bulk-delete", {
+      method: "POST", headers: { ...adminHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: idsToDelete }),
+    });
+    assert.equal(cleaned.body.deleted, 30);
+
+    const sitePage = await browser.newPage();
+    sitePage.on("console", message => {
+      if (message.type() === "error" && /content security policy|refused to/i.test(message.text())) cspErrors.push(message.text());
+    });
+    for (const path of ["/", "/download.html", "/privacy.html", "/terms.html", "/admin.html"]) {
+      await sitePage.goto(`${baseUrl}${path}`, { waitUntil: "networkidle" });
+    }
+    assert.deepEqual(cspErrors, []);
+    await sitePage.close();
 
     const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await mobilePage.goto(`${baseUrl}/feedback.html`, { waitUntil: "networkidle" });

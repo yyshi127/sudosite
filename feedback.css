@@ -395,6 +395,22 @@ a {
   font-size: 11px;
 }
 
+.feedback-field-error {
+  display: block;
+  margin-top: -16px;
+  color: #b42318;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.feedback-field-error[hidden] {
+  display: none;
+}
+
+.feedback-field [aria-invalid="true"] {
+  border-color: #b42318;
+}
+
 .feedback-upload {
   display: flex;
   align-items: center;
@@ -570,7 +586,7 @@ a {
 }
 
 .feedback-submit:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.68;
   transform: none;
 }

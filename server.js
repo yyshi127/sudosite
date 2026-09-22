@@ -15,6 +15,7 @@ if (!bootstrapAdminPassword) {
 
 const app = express();
 app.set("trust proxy", "loopback");
+app.disable("x-powered-by");
 
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "127.0.0.1";
@@ -64,6 +65,15 @@ db.prepare(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   )
 `).run();
+
+const feedbackColumns = db.prepare("PRAGMA table_info(feedback_items)").all().map(column => column.name);
+if (!feedbackColumns.includes("dedupe_hash")) {
+  db.prepare("ALTER TABLE feedback_items ADD COLUMN dedupe_hash TEXT DEFAULT NULL").run();
+}
+if (!feedbackColumns.includes("dedupe_at")) {
+  db.prepare("ALTER TABLE feedback_items ADD COLUMN dedupe_at INTEGER DEFAULT NULL").run();
+}
+db.prepare("CREATE INDEX IF NOT EXISTS feedback_items_dedupe_idx ON feedback_items(dedupe_hash, dedupe_at)").run();
 
 const demoColumns = db.prepare("PRAGMA table_info(demo_requests)").all().map(column => column.name);
 if (!demoColumns.includes("deleted_at")) {
@@ -116,7 +126,7 @@ if (!getSetting("admin_password_hash")) {
   setSetting("admin_password_hash", hashPassword(bootstrapAdminPassword));
 }
 
-function createRateLimiter({ windowMs, maxRequests, errorMessage }) {
+function createRateLimiter({ windowMs, maxRequests, errorMessage, countOnRequest = true }) {
   const clients = new Map();
   const cleanupTimer = setInterval(() => {
     const now = Date.now();
@@ -130,27 +140,34 @@ function createRateLimiter({ windowMs, maxRequests, errorMessage }) {
 
   cleanupTimer.unref();
 
-  return (req, res, next) => {
+  function getEntry(req) {
     const now = Date.now();
     const key = req.ip || req.socket.remoteAddress || "unknown";
-    const entry = clients.get(key);
+    let entry = clients.get(key);
 
     if (!entry || now >= entry.resetAt) {
-      clients.set(key, { count: 1, resetAt: now + windowMs });
-      next();
-      return;
+      entry = { count: 0, resetAt: now + windowMs };
+      clients.set(key, entry);
     }
+    return entry;
+  }
+
+  const limiter = (req, res, next) => {
+    const entry = getEntry(req);
 
     if (entry.count >= maxRequests) {
-      const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
+      const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1000));
       res.setHeader("Retry-After", String(retryAfterSeconds));
-      res.status(429).json({ ok: false, error: errorMessage });
+      res.status(429).json({ ok: false, error: errorMessage, retry_after: retryAfterSeconds });
       return;
     }
 
-    entry.count += 1;
+    if (countOnRequest) entry.count += 1;
     next();
   };
+
+  limiter.record = req => { getEntry(req).count += 1; };
+  return limiter;
 }
 
 const adminLoginRateLimiter = createRateLimiter({
@@ -163,15 +180,25 @@ const demoRequestRateLimiter = createRateLimiter({
   maxRequests: 5,
   errorMessage: "\u9884\u7ea6\u63d0\u4ea4\u8fc7\u4e8e\u9891\u7e41\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5",
 });
-const feedbackRateLimiter = createRateLimiter({
+const feedbackAttemptRateLimiter = createRateLimiter({
   windowMs: 10 * 60 * 1000,
-  maxRequests: 6,
+  maxRequests: 100,
+  errorMessage: "提交尝试过于频繁，请稍后再试",
+});
+const feedbackSubmissionRateLimiter = createRateLimiter({
+  windowMs: 10 * 60 * 1000,
+  maxRequests: 30,
   errorMessage: "提交过于频繁，请稍后再试",
+  countOnRequest: false,
 });
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
+  next();
+});
 app.use("/api/admin/login", adminLoginRateLimiter);
 app.use("/api/demo-requests", demoRequestRateLimiter);
-app.use("/api/feedback", feedbackRateLimiter, express.json({ limit: "8mb" }));
+app.post("/api/feedback", feedbackAttemptRateLimiter, express.json({ limit: "8mb" }));
 app.use(express.json({ limit: "32kb" }));
 app.use((error, req, res, next) => {
   if (error && error.type === "entity.parse.failed") {
@@ -201,12 +228,12 @@ function parseCookies(header = "") {
 function setAdminSessionCookie(res, token) {
   res.setHeader(
     "Set-Cookie",
-    `sudo_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${sessionCookieMaxAgeSeconds}`
+    `sudo_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${sessionCookieMaxAgeSeconds}${res.req.secure ? "; Secure" : ""}`
   );
 }
 
 function clearAdminSessionCookie(res) {
-  res.setHeader("Set-Cookie", "sudo_admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+  res.setHeader("Set-Cookie", `sudo_admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${res.req.secure ? "; Secure" : ""}`);
 }
 
 function createAdminSession(res) {
@@ -272,19 +299,19 @@ async function validateScreenshot(value) {
   if (value == null || value === "") return { data: null };
 
   if (!value || typeof value !== "object") {
-    return { error: "截图格式不正确，请重新选择" };
+    return { error: "截图格式不正确，请重新选择", field: "screenshot" };
   }
 
   const originalName = path.basename(normalizeText(value.name)).slice(0, 180);
   const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(value.dataUrl || ""));
 
   if (!match || !screenshotExtensions[match[1]]) {
-    return { error: "截图仅支持 JPG、PNG 或 WebP 格式" };
+    return { error: "截图仅支持 JPG、PNG 或 WebP 格式", field: "screenshot" };
   }
 
   const buffer = Buffer.from(match[2], "base64");
   if (!buffer.length || buffer.length > 5 * 1024 * 1024) {
-    return { error: "截图大小不能超过 5MB" };
+    return { error: "截图大小不能超过 5MB", field: "screenshot" };
   }
 
   const isJpeg = buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
@@ -295,7 +322,7 @@ async function validateScreenshot(value) {
     || (match[1] === "image/webp" && isWebp);
 
   if (!signatureMatches) {
-    return { error: "截图内容与文件格式不一致，请重新选择" };
+    return { error: "截图内容与文件格式不一致，请重新选择", field: "screenshot" };
   }
 
   let normalizedBuffer;
@@ -303,15 +330,15 @@ async function validateScreenshot(value) {
     const image = sharp(buffer, { failOn: "warning", limitInputPixels: 20_000_000 });
     const metadata = await image.metadata();
     if (metadata.format !== match[1].slice(6)) {
-      return { error: "截图内容与文件格式不一致，请重新选择" };
+      return { error: "截图内容与文件格式不一致，请重新选择", field: "screenshot" };
     }
     normalizedBuffer = await image.toFormat(metadata.format).toBuffer();
   } catch (error) {
-    return { error: "截图文件已损坏或分辨率过大，请重新选择" };
+    return { error: "截图文件已损坏或分辨率过大，请重新选择", field: "screenshot" };
   }
 
   if (normalizedBuffer.length > 5 * 1024 * 1024) {
-    return { error: "截图处理后大小不能超过 5MB" };
+    return { error: "截图处理后大小不能超过 5MB", field: "screenshot" };
   }
 
   return {
@@ -330,19 +357,19 @@ async function validateFeedback(body) {
   const name = normalizeText(body.name);
 
   if (!feedbackStatuses[type]) {
-    return { error: "请选择问题或建议" };
+    return { error: "请选择问题或建议", field: "type" };
   }
 
   if (description.length < 10) {
-    return { error: "请再详细描述一些，至少填写 10 个字" };
+    return { error: "请再详细描述一些，至少填写 10 个字", field: "description" };
   }
 
   if (description.length > 3000) {
-    return { error: "描述不能超过 3000 个字" };
+    return { error: "描述不能超过 3000 个字", field: "description" };
   }
 
   if (!name || name.length > 40) {
-    return { error: "请填写姓名，最多 40 个字" };
+    return { error: "请填写姓名，最多 40 个字", field: "name" };
   }
 
   const screenshot = await validateScreenshot(body.screenshot);
@@ -421,12 +448,31 @@ app.post("/api/feedback", async (req, res) => {
   const result = await validateFeedback(req.body || {});
 
   if (result.error) {
-    res.status(400).json({ ok: false, error: result.error });
+    res.status(400).json({ ok: false, error: result.error, field: result.field });
     return;
   }
 
-  const ticketNo = createFeedbackTicket();
   const screenshot = result.data.screenshot;
+  const dedupeHash = crypto.createHash("sha256").update(JSON.stringify([
+    req.ip, result.data.type, result.data.description, result.data.name,
+    screenshot ? crypto.createHash("sha256").update(screenshot.buffer).digest("hex") : "",
+  ])).digest("hex");
+  const dedupeAt = Date.now();
+  const duplicate = db.prepare(`
+    SELECT ticket_no FROM feedback_items
+    WHERE dedupe_hash = ? AND dedupe_at >= ?
+    ORDER BY dedupe_at DESC LIMIT 1
+  `).get(dedupeHash, dedupeAt - 2 * 60 * 1000);
+  if (duplicate) {
+    res.json({ ok: true, ticket_no: duplicate.ticket_no, duplicate: true, message: "这条反馈已收到，请勿重复提交" });
+    return;
+  }
+
+  let allowed = false;
+  feedbackSubmissionRateLimiter(req, res, () => { allowed = true; });
+  if (!allowed) return;
+
+  const ticketNo = createFeedbackTicket();
   const screenshotFile = screenshot ? `${crypto.randomUUID()}.${screenshot.extension}` : null;
 
   try {
@@ -437,10 +483,10 @@ app.post("/api/feedback", async (req, res) => {
     db.prepare(`
       INSERT INTO feedback_items (
         ticket_no, type, description, name,
-        screenshot_file, screenshot_name, screenshot_mime, screenshot_size
+        screenshot_file, screenshot_name, screenshot_mime, screenshot_size, dedupe_hash, dedupe_at
       ) VALUES (
         @ticketNo, @type, @description, @name,
-        @screenshotFile, @screenshotName, @screenshotMime, @screenshotSize
+        @screenshotFile, @screenshotName, @screenshotMime, @screenshotSize, @dedupeHash, @dedupeAt
       )
     `).run({
       ticketNo,
@@ -451,6 +497,8 @@ app.post("/api/feedback", async (req, res) => {
       screenshotName: screenshot ? screenshot.originalName : null,
       screenshotMime: screenshot ? screenshot.mime : null,
       screenshotSize: screenshot ? screenshot.buffer.length : null,
+      dedupeHash,
+      dedupeAt,
     });
   } catch (error) {
     if (screenshotFile) {
@@ -459,6 +507,7 @@ app.post("/api/feedback", async (req, res) => {
     throw error;
   }
 
+  feedbackSubmissionRateLimiter.record(req);
   res.status(201).json({
     ok: true,
     ticket_no: ticketNo,

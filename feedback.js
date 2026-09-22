@@ -17,10 +17,67 @@ const successMessage = document.querySelector("#feedback-success-message");
 const submitAgain = document.querySelector("#feedback-again");
 
 let selectedScreenshot = null;
+let isSubmitting = false;
+let cooldownUntil = 0;
+let cooldownTimer = null;
+
+const fieldInputs = {
+  description,
+  name: form.elements.name,
+  screenshot: screenshotInput,
+};
 
 function setStatus(message, type = "") {
   status.textContent = message;
   status.dataset.type = type;
+  status.setAttribute("role", type === "error" ? "alert" : "status");
+  status.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+}
+
+function clearFieldError(field) {
+  const hint = document.querySelector(`#feedback-${field}-error`);
+  if (!hint) return;
+  hint.textContent = "";
+  hint.hidden = true;
+  fieldInputs[field].removeAttribute("aria-invalid");
+}
+
+function setFieldError(field, message) {
+  const hint = document.querySelector(`#feedback-${field}-error`);
+  if (!hint) {
+    setStatus(message, "error");
+    return;
+  }
+  hint.textContent = message;
+  hint.hidden = false;
+  fieldInputs[field].setAttribute("aria-invalid", "true");
+  setStatus(message, "error");
+  if (field !== "screenshot") fieldInputs[field].focus();
+}
+
+function refreshSubmitButton() {
+  submitButton.disabled = isSubmitting || Date.now() < cooldownUntil;
+  submitButton.querySelector("span").textContent = isSubmitting ? "正在提交…" : "提交反馈";
+}
+
+function beginCooldown(seconds) {
+  cooldownUntil = Date.now() + seconds * 1000;
+  clearInterval(cooldownTimer);
+  const tick = () => {
+    const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+      cooldownUntil = 0;
+      setStatus("");
+    } else {
+      const wait = remaining >= 60 ? `约 ${Math.ceil(remaining / 60)} 分钟` : `约 ${remaining} 秒`;
+      setStatus(`提交过于频繁，请${wait}后再试`, "error");
+    }
+    refreshSubmitButton();
+  };
+  tick();
+  cooldownTimer = setInterval(tick, 1000);
 }
 
 function formatSize(bytes) {
@@ -33,6 +90,7 @@ function clearScreenshot() {
   filePreview.removeAttribute("src");
   filePanel.hidden = true;
   uploadArea.hidden = false;
+  clearFieldError("screenshot");
 }
 
 function useScreenshot(file) {
@@ -40,14 +98,14 @@ function useScreenshot(file) {
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   if (!allowedTypes.includes(file.type)) {
-    setStatus("截图仅支持 JPG、PNG 或 WebP 格式", "error");
     clearScreenshot();
+    setFieldError("screenshot", "截图仅支持 JPG、PNG 或 WebP 格式");
     return;
   }
 
   if (file.size > 5 * 1024 * 1024) {
-    setStatus("截图不能超过 5MB，请压缩后重新选择", "error");
     clearScreenshot();
+    setFieldError("screenshot", "截图不能超过 5MB，请压缩后重新选择");
     return;
   }
 
@@ -60,6 +118,7 @@ function useScreenshot(file) {
     uploadArea.hidden = true;
     filePanel.hidden = false;
     setStatus("");
+    clearFieldError("screenshot");
   });
   reader.addEventListener("error", () => setStatus("截图读取失败，请重新选择", "error"));
   reader.readAsDataURL(file);
@@ -67,7 +126,9 @@ function useScreenshot(file) {
 
 description.addEventListener("input", () => {
   descriptionCount.textContent = String(description.value.length);
+  clearFieldError("description");
 });
+form.elements.name.addEventListener("input", () => clearFieldError("name"));
 
 screenshotInput.addEventListener("change", () => useScreenshot(screenshotInput.files[0]));
 fileRemove.addEventListener("click", clearScreenshot);
@@ -90,24 +151,23 @@ uploadArea.addEventListener("drop", event => useScreenshot(event.dataTransfer.fi
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
+  if (isSubmitting || Date.now() < cooldownUntil) return;
   const data = new FormData(form);
   const descriptionValue = String(data.get("description") || "").trim();
   const name = String(data.get("name") || "").trim();
 
   if (descriptionValue.length < 10) {
-    setStatus("请再详细描述一些，至少填写 10 个字", "error");
-    description.focus();
+    setFieldError("description", "请再详细描述一些，至少填写 10 个字");
     return;
   }
 
   if (!name) {
-    setStatus("请填写你的姓名", "error");
-    form.elements.name.focus();
+    setFieldError("name", "请填写你的姓名");
     return;
   }
 
-  submitButton.disabled = true;
-  submitButton.querySelector("span").textContent = "正在提交…";
+  isSubmitting = true;
+  refreshSubmitButton();
   setStatus("正在安全提交，请稍候");
 
   try {
@@ -129,7 +189,18 @@ form.addEventListener("submit", async event => {
     }));
 
     if (!response.ok || !result.ok) {
-      setStatus(result.error || "提交失败，请稍后重试", "error");
+      if (response.status === 429) {
+        const retryAfter = Number(response.headers.get("Retry-After") || result.retry_after);
+        if (Number.isFinite(retryAfter) && retryAfter > 0) {
+          beginCooldown(retryAfter);
+          return;
+        }
+      }
+      if (result.field && fieldInputs[result.field]) {
+        setFieldError(result.field, result.error);
+      } else {
+        setStatus(result.error || "提交失败，请稍后重试", "error");
+      }
       return;
     }
 
@@ -142,8 +213,8 @@ form.addEventListener("submit", async event => {
   } catch {
     setStatus("网络连接异常，请检查网络后重试", "error");
   } finally {
-    submitButton.disabled = false;
-    submitButton.querySelector("span").textContent = "提交反馈";
+    isSubmitting = false;
+    refreshSubmitButton();
   }
 });
 
@@ -151,6 +222,8 @@ submitAgain.addEventListener("click", () => {
   form.reset();
   descriptionCount.textContent = "0";
   clearScreenshot();
+  clearFieldError("description");
+  clearFieldError("name");
   setStatus("");
   successPanel.hidden = true;
   panel.hidden = false;

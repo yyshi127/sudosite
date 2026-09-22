@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="向小兢会计提交问题或产品建议。" />
     <title>意见建议｜小兢会计</title>
-    <link rel="stylesheet" href="./feedback.css?v=20260921-1" />
-    <script src="./feedback.js?v=20260922-2" defer></script>
+    <link rel="stylesheet" href="./feedback.css?v=20260922-4" />
+    <script src="./feedback.js?v=20260922-5" defer></script>
   </head>
   <body class="feedback-page">
     <header class="feedback-header">
@@ -60,9 +60,10 @@
 
           <label class="feedback-field">
             <span>请具体描述 <em>*</em></span>
-            <textarea name="description" maxlength="3000" rows="7" placeholder="请告诉我们发生了什么、你原本希望怎样，或你希望增加什么功能……" required></textarea>
+            <textarea name="description" maxlength="3000" rows="7" aria-describedby="feedback-description-error" placeholder="请告诉我们发生了什么、你原本希望怎样，或你希望增加什么功能……" required></textarea>
             <small><span id="description-count">0</span> / 3000</small>
           </label>
+          <small class="feedback-field-error" id="feedback-description-error" hidden></small>
 
           <div class="feedback-field">
             <span>添加截图 <b>选填</b></span>
@@ -79,11 +80,13 @@
               <button id="feedback-file-remove" type="button" aria-label="移除截图" title="移除截图">×</button>
             </div>
           </div>
+          <small class="feedback-field-error" id="feedback-screenshot-error" hidden></small>
 
           <label class="feedback-field feedback-name-field">
             <span>你的姓名 <em>*</em></span>
-            <input name="name" type="text" maxlength="40" autocomplete="name" placeholder="怎么称呼你" required />
+            <input name="name" type="text" maxlength="40" autocomplete="name" aria-describedby="feedback-name-error" placeholder="怎么称呼你" required />
           </label>
+          <small class="feedback-field-error" id="feedback-name-error" hidden></small>
 
           <p class="feedback-status" id="feedback-status" role="status" aria-live="polite"></p>
           <button class="feedback-submit" id="feedback-submit" type="submit">
