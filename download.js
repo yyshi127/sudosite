@@ -1,4 +1,4 @@
-const DOWNLOAD_URL = "./downloads/xiaojing-accounting-0.2.4-20260920-windows-x64-setup.exe";
+const DOWNLOAD_URL = "./downloads/xiaojing-accounting-0.3.2-20261004-windows-x64-setup.exe";
 
 const translations = {
   zh: {
@@ -64,7 +64,11 @@ const releaseStatus = document.querySelector("[data-release-status]");
 const releaseStatusRow = releaseStatus.closest(".release-status");
 const metaDescription = document.querySelector('meta[name="description"]');
 
-let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh";
+const savedLanguage = localStorage.getItem("sudoLanguagePreference");
+const isEnglishDomain = location.hostname === "sudotech.ai" || location.hostname.endsWith(".sudotech.ai");
+let currentLanguage = savedLanguage === "zh" || savedLanguage === "en"
+  ? savedLanguage
+  : (isEnglishDomain ? "en" : "zh");
 
 function applyText(language) {
   const dictionary = translations[language];
@@ -120,7 +124,7 @@ function applyText(language) {
 
 function applyLanguage(language) {
   currentLanguage = language === "en" ? "en" : "zh";
-  localStorage.setItem("sudoLanguage", currentLanguage);
+  localStorage.setItem("sudoLanguagePreference", currentLanguage);
   applyText(currentLanguage);
 }
 

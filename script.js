@@ -342,7 +342,11 @@ let timer;
 let captionFadeTimer;
 let slideTransitionTimer;
 let slideInitialized = false;
-let currentLanguage = localStorage.getItem("sudoLanguage") === "en" ? "en" : "zh";
+const savedLanguage = localStorage.getItem("sudoLanguagePreference");
+const isEnglishDomain = location.hostname === "sudotech.ai" || location.hostname.endsWith(".sudotech.ai");
+let currentLanguage = savedLanguage === "zh" || savedLanguage === "en"
+  ? savedLanguage
+  : (isEnglishDomain ? "en" : "zh");
 let lastFocusedElement = null;
 let snapLocked = false;
 let snapUnlockTimer = 0;
@@ -361,7 +365,7 @@ function setElementContent(element, value) {
   }
 }
 
-function applyLanguage(language) {
+function applyLanguage(language, persistPreference = true) {
   currentLanguage = language === "en" ? "en" : "zh";
   const dictionary = i18n[currentLanguage];
 
@@ -374,7 +378,7 @@ function applyLanguage(language) {
     option.classList.toggle("active", isActive);
     option.setAttribute("aria-pressed", String(isActive));
   });
-  localStorage.setItem("sudoLanguage", currentLanguage);
+  if (persistPreference) localStorage.setItem("sudoLanguagePreference", currentLanguage);
 
   document.querySelectorAll("[data-i18n]").forEach(element => {
     setElementContent(element, dictionary[element.dataset.i18n]);
@@ -672,5 +676,5 @@ demoForm.addEventListener("submit", async event => {
   }
 });
 
-applyLanguage(currentLanguage);
+applyLanguage(currentLanguage, false);
 startAuto();
