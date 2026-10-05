@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "check": "node --check server.js && node --check admin.js && node --check feedback.js && node --check feedback-admin.js",
-    "test": "node tests/feedback-system.test.cjs && node tests/language-default.test.cjs"
+    "test": "node tests/feedback-system.test.cjs && node tests/language-default.test.cjs && node tests/download-tracking.test.cjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.6",

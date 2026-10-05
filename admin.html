@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUDO 数豆｜预约演示后台</title>
     <link rel="stylesheet" href="./feedback.css?v=20260922-3" />
-    <link rel="stylesheet" href="./styles.css?v=20260922-2" />
-    <script src="./admin.js?v=20260922-4" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20261005-1" />
+    <script src="./admin.js?v=20261005-1" defer></script>
     <script src="./feedback-admin.js?v=20260922-3" defer></script>
   </head>
   <body class="admin-page">
@@ -21,6 +21,9 @@
           </button>
           <button id="admin-tab-feedback" class="admin-view-tab" type="button" role="tab" aria-controls="feedback-admin-dashboard" aria-selected="false" tabindex="-1" data-admin-view="feedback">
             <span class="admin-tab-label-full">问题反馈后台</span><span class="admin-tab-label-short">反馈后台</span><span class="admin-tab-label-tiny">反馈</span>
+          </button>
+          <button id="admin-tab-downloads" class="admin-view-tab" type="button" role="tab" aria-controls="download-admin-dashboard" aria-selected="false" tabindex="-1" data-admin-view="downloads">
+            <span class="admin-tab-label-full">下载统计</span><span class="admin-tab-label-short">下载统计</span><span class="admin-tab-label-tiny">下载</span>
           </button>
         </div>
         <button class="admin-icon-button" id="admin-settings-open" type="button" aria-label="后台设置" title="后台设置">
@@ -161,6 +164,47 @@
             <button type="button" id="feedback-admin-confirm-delete">确认删除</button>
           </div>
         </dialog>
+      </section>
+
+      <section class="admin-dashboard download-admin-dashboard" id="download-admin-dashboard" role="tabpanel" aria-labelledby="admin-tab-downloads" hidden>
+        <div class="admin-toolbar">
+          <div>
+            <p class="eyebrow">Download analytics</p>
+            <h1>软件下载统计</h1>
+          </div>
+          <button class="button secondary" id="download-admin-refresh" type="button">刷新</button>
+        </div>
+        <dl class="download-admin-summary" aria-label="下载概览">
+          <div>
+            <dt>累计下载</dt>
+            <dd id="download-admin-total">0</dd>
+          </div>
+          <div>
+            <dt>今日下载</dt>
+            <dd id="download-admin-today">0</dd>
+          </div>
+          <div>
+            <dt>最近下载</dt>
+            <dd class="download-admin-last" id="download-admin-last">暂无</dd>
+          </div>
+        </dl>
+        <p class="admin-status" id="download-admin-status" role="status" aria-live="polite"></p>
+        <div class="download-admin-table-wrap">
+          <table class="download-admin-table">
+            <thead>
+              <tr>
+                <th>产品</th>
+                <th>版本</th>
+                <th>累计</th>
+                <th>今日</th>
+                <th>首次下载</th>
+                <th>最近下载</th>
+              </tr>
+            </thead>
+            <tbody id="download-admin-versions"></tbody>
+          </table>
+        </div>
+        <p class="download-admin-note">统计下载发起次数；同一访客 10 分钟内重复点击只记录一次。</p>
       </section>
 
       <div class="admin-settings-modal" id="admin-settings" aria-hidden="true">

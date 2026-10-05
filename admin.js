@@ -2,6 +2,8 @@ const loginPanel = document.querySelector("#admin-login");
 const dashboard = document.querySelector("#admin-dashboard");
 const feedbackDashboard = document.querySelector("#feedback-admin-dashboard");
 const feedbackDashboardStatus = document.querySelector("#feedback-admin-dashboard-status");
+const downloadDashboard = document.querySelector("#download-admin-dashboard");
+const downloadDashboardStatus = document.querySelector("#download-admin-status");
 const loginTitle = document.querySelector("#admin-login-title");
 const viewTabs = [...document.querySelectorAll("[data-admin-view]")];
 const loginForm = document.querySelector("#admin-login-form");
@@ -27,6 +29,11 @@ const refreshButton = document.querySelector("#admin-refresh");
 const logoutButton = document.querySelector("#admin-logout");
 const csvExportLink = document.querySelector('a[href="/api/admin/demo-requests.csv"]');
 const filterButtons = [...document.querySelectorAll(".admin-filter-button")];
+const downloadRefreshButton = document.querySelector("#download-admin-refresh");
+const downloadTotal = document.querySelector("#download-admin-total");
+const downloadToday = document.querySelector("#download-admin-today");
+const downloadLast = document.querySelector("#download-admin-last");
+const downloadVersions = document.querySelector("#download-admin-versions");
 let currentRows = [];
 let currentFilter = "all";
 let selectedIds = new Set();
@@ -34,7 +41,7 @@ let pendingDeleteIds = [];
 let adminSessionTimer = 0;
 let adminAuthenticated = false;
 const savedView = window.sessionStorage.getItem("sudo-admin-view");
-let activeView = savedView === "feedback" || savedView === "requests"
+let activeView = ["requests", "feedback", "downloads"].includes(savedView)
   ? savedView
   : window.location.pathname === "/feedback-admin" ? "feedback" : "requests";
 const adminSessionTimeoutMs = 30 * 60 * 1000;
@@ -68,12 +75,17 @@ function setAdminView(view, load = true) {
     tab.setAttribute("aria-selected", String(selected));
     tab.tabIndex = selected ? 0 : -1;
   });
-  loginTitle.textContent = view === "feedback" ? "查看问题反馈" : "查看预约线索";
+  loginTitle.textContent = view === "feedback"
+    ? "查看问题反馈"
+    : view === "downloads" ? "查看下载统计" : "查看预约线索";
   dashboard.hidden = !adminAuthenticated || view !== "requests";
   feedbackDashboard.hidden = !adminAuthenticated || view !== "feedback";
+  downloadDashboard.hidden = !adminAuthenticated || view !== "downloads";
 
   if (load && adminAuthenticated && view === "feedback") {
     window.feedbackAdmin?.load();
+  } else if (load && adminAuthenticated && view === "downloads") {
+    loadDownloadStats();
   }
 }
 
@@ -95,6 +107,7 @@ function showLoginPanel(message = "登录已过期，请重新登录", type = "e
   logoutButton.hidden = true;
   loginPanel.hidden = false;
   window.feedbackAdmin?.clear();
+  clearDownloadStats();
   setAdminView(activeView, false);
   setStatus(loginStatus, message, type);
 }
@@ -325,6 +338,85 @@ function closeDeleteModal() {
   setStatus(deleteStatus, "");
 }
 
+function clearDownloadStats() {
+  downloadTotal.textContent = "0";
+  downloadToday.textContent = "0";
+  downloadLast.textContent = "暂无";
+  downloadVersions.replaceChildren();
+  setStatus(downloadDashboardStatus, "");
+}
+
+function formatDownloadTime(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(new Date(value));
+}
+
+function renderDownloadStats(result) {
+  downloadTotal.textContent = Number(result.summary.total || 0).toLocaleString("zh-CN");
+  downloadToday.textContent = Number(result.summary.today || 0).toLocaleString("zh-CN");
+  downloadLast.textContent = result.summary.last_download_at
+    ? formatDownloadTime(result.summary.last_download_at)
+    : "暂无";
+  downloadVersions.replaceChildren();
+
+  (result.versions || []).forEach(row => {
+    const tableRow = document.createElement("tr");
+    const productCell = document.createElement("td");
+    const versionCell = document.createElement("td");
+    productCell.textContent = row.product_name;
+    versionCell.textContent = row.version;
+    if (row.is_current) {
+      const current = document.createElement("span");
+      current.className = "download-admin-current";
+      current.textContent = "当前版本";
+      versionCell.appendChild(current);
+    }
+
+    const values = [
+      Number(row.download_count || 0).toLocaleString("zh-CN"),
+      Number(row.today_count || 0).toLocaleString("zh-CN"),
+      formatDownloadTime(row.first_download_at),
+      formatDownloadTime(row.last_download_at),
+    ];
+    tableRow.append(productCell, versionCell);
+    values.forEach(value => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      tableRow.appendChild(cell);
+    });
+    downloadVersions.appendChild(tableRow);
+  });
+}
+
+async function loadDownloadStats() {
+  setStatus(downloadDashboardStatus, "正在加载下载统计...");
+
+  try {
+    const response = await fetch("/api/admin/download-stats", {
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+    if (handleAuthExpired(response)) return;
+    const result = await readJsonResponse(response, "下载统计读取失败");
+    if (!response.ok || !result.ok) {
+      setStatus(downloadDashboardStatus, result.error || "下载统计读取失败", "error");
+      return;
+    }
+    renderDownloadStats(result);
+    setStatus(downloadDashboardStatus, "");
+  } catch (error) {
+    setStatus(downloadDashboardStatus, "网络异常，请稍后重试", "error");
+  }
+}
+
 async function loadRequests() {
   setStatus(dashboardStatus, "正在加载预约记录...");
   const response = await fetch("/api/admin/demo-requests", {
@@ -426,7 +518,9 @@ viewTabs.forEach(tab => {
   tab.addEventListener("keydown", event => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
-    const next = viewTabs.find(item => item !== tab);
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const index = viewTabs.indexOf(tab);
+    const next = viewTabs[(index + direction + viewTabs.length) % viewTabs.length];
     next.focus();
     next.click();
   });
@@ -506,10 +600,14 @@ bulkDeleteButton.addEventListener("click", () => {
 });
 
 refreshButton.addEventListener("click", loadRequests);
+downloadRefreshButton.addEventListener("click", loadDownloadStats);
 
 logoutButton.addEventListener("click", async () => {
   logoutButton.disabled = true;
-  setStatus(activeView === "feedback" ? feedbackDashboardStatus : dashboardStatus, "正在退出登录...");
+  const activeStatus = activeView === "feedback"
+    ? feedbackDashboardStatus
+    : activeView === "downloads" ? downloadDashboardStatus : dashboardStatus;
+  setStatus(activeStatus, "正在退出登录...");
 
   try {
     await fetch("/api/admin/logout", {
@@ -526,12 +624,14 @@ logoutButton.addEventListener("click", async () => {
 window.addEventListener("focus", () => {
   if (!adminAuthenticated) return;
   if (activeView === "feedback") window.feedbackAdmin?.load();
+  else if (activeView === "downloads") loadDownloadStats();
   else loadRequests();
 });
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden || !adminAuthenticated) return;
   if (activeView === "feedback") window.feedbackAdmin?.load();
+  else if (activeView === "downloads") loadDownloadStats();
   else loadRequests();
 });
 

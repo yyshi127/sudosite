@@ -26,6 +26,14 @@ const feedbackUploadDir = path.join(dataDir, "feedback-uploads");
 const sessions = new Map();
 const sessionTtlMs = 30 * 60 * 1000;
 const sessionCookieMaxAgeSeconds = Math.floor(sessionTtlMs / 1000);
+const downloadProducts = {
+  "xiaojing-accounting": {
+    name: "小兢会计桌面版",
+    version: "0.3.2",
+    fileUrl: "/downloads/xiaojing-accounting-0.3.2-20261004-windows-x64-setup.exe",
+  },
+};
+const downloadDedupeWindowMs = 10 * 60 * 1000;
 
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(feedbackUploadDir, { recursive: true });
@@ -65,6 +73,35 @@ db.prepare(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   )
 `).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS download_stats (
+    product TEXT NOT NULL,
+    version TEXT NOT NULL,
+    download_count INTEGER NOT NULL DEFAULT 0,
+    first_download_at TEXT DEFAULT NULL,
+    last_download_at TEXT DEFAULT NULL,
+    PRIMARY KEY (product, version)
+  )
+`).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS download_daily_stats (
+    product TEXT NOT NULL,
+    version TEXT NOT NULL,
+    download_date TEXT NOT NULL,
+    download_count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (product, version, download_date)
+  )
+`).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS download_visitors (
+    product TEXT NOT NULL,
+    version TEXT NOT NULL,
+    visitor_hash TEXT NOT NULL,
+    last_counted_at INTEGER NOT NULL,
+    PRIMARY KEY (product, version, visitor_hash)
+  )
+`).run();
+db.prepare("CREATE INDEX IF NOT EXISTS download_visitors_time_idx ON download_visitors(last_counted_at)").run();
 
 const feedbackColumns = db.prepare("PRAGMA table_info(feedback_items)").all().map(column => column.name);
 if (!feedbackColumns.includes("dedupe_hash")) {
@@ -125,6 +162,10 @@ function setSetting(key, value) {
 if (!getSetting("admin_password_hash")) {
   setSetting("admin_password_hash", hashPassword(bootstrapAdminPassword));
 }
+if (!getSetting("download_visitor_secret")) {
+  setSetting("download_visitor_secret", crypto.randomBytes(32).toString("hex"));
+}
+const downloadVisitorSecret = getSetting("download_visitor_secret");
 
 function createRateLimiter({ windowMs, maxRequests, errorMessage, countOnRequest = true }) {
   const clients = new Map();
@@ -191,6 +232,11 @@ const feedbackSubmissionRateLimiter = createRateLimiter({
   errorMessage: "提交过于频繁，请稍后再试",
   countOnRequest: false,
 });
+const downloadRequestRateLimiter = createRateLimiter({
+  windowMs: 10 * 60 * 1000,
+  maxRequests: 60,
+  errorMessage: "下载请求过于频繁，请稍后再试",
+});
 
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
@@ -199,6 +245,7 @@ app.use((req, res, next) => {
 app.use("/api/admin/login", adminLoginRateLimiter);
 app.use("/api/demo-requests", demoRequestRateLimiter);
 app.post("/api/feedback", feedbackAttemptRateLimiter, express.json({ limit: "8mb" }));
+app.use("/api/download", downloadRequestRateLimiter);
 app.use(express.json({ limit: "32kb" }));
 app.use((error, req, res, next) => {
   if (error && error.type === "entity.parse.failed") {
@@ -223,6 +270,21 @@ function parseCookies(header = "") {
     if (key) cookies[key] = decodeURIComponent(value);
     return cookies;
   }, {});
+}
+
+function getDownloadVisitorHash(req, res) {
+  const cookies = parseCookies(req.headers.cookie);
+  let token = cookies.sudo_download_visitor;
+
+  if (!/^[a-f0-9]{32}$/.test(token || "")) {
+    token = crypto.randomBytes(16).toString("hex");
+    res.append(
+      "Set-Cookie",
+      `sudo_download_visitor=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000${req.secure ? "; Secure" : ""}`
+    );
+  }
+
+  return crypto.createHmac("sha256", downloadVisitorSecret).update(token).digest("hex");
 }
 
 function setAdminSessionCookie(res, token) {
@@ -284,6 +346,52 @@ function normalizeIds(value) {
 
   return [...new Set(value.map(id => Number(id)).filter(id => Number.isInteger(id) && id > 0))];
 }
+
+function getShanghaiDateKey(timestamp = Date.now()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(timestamp));
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+const recordDownload = db.transaction(({ product, version, visitorHash, now }) => {
+  const previous = db.prepare(`
+    SELECT last_counted_at FROM download_visitors
+    WHERE product = ? AND version = ? AND visitor_hash = ?
+  `).get(product, version, visitorHash);
+
+  if (previous && now - previous.last_counted_at < downloadDedupeWindowMs) {
+    return false;
+  }
+
+  const timestamp = new Date(now).toISOString();
+  const dateKey = getShanghaiDateKey(now);
+  db.prepare(`
+    INSERT INTO download_visitors (product, version, visitor_hash, last_counted_at)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(product, version, visitor_hash)
+    DO UPDATE SET last_counted_at = excluded.last_counted_at
+  `).run(product, version, visitorHash, now);
+  db.prepare(`
+    INSERT INTO download_stats (product, version, download_count, first_download_at, last_download_at)
+    VALUES (?, ?, 1, ?, ?)
+    ON CONFLICT(product, version) DO UPDATE SET
+      download_count = download_count + 1,
+      last_download_at = excluded.last_download_at
+  `).run(product, version, timestamp, timestamp);
+  db.prepare(`
+    INSERT INTO download_daily_stats (product, version, download_date, download_count)
+    VALUES (?, ?, ?, 1)
+    ON CONFLICT(product, version, download_date)
+    DO UPDATE SET download_count = download_count + 1
+  `).run(product, version, dateKey);
+  db.prepare("DELETE FROM download_visitors WHERE last_counted_at < ?").run(now - 30 * 24 * 60 * 60 * 1000);
+  return true;
+});
 
 const feedbackStatuses = {
   issue: ["pending_evaluation", "evaluated_pending", "adopted", "resolved"],
@@ -515,6 +623,31 @@ app.post("/api/feedback", async (req, res) => {
   });
 });
 
+app.head("/api/download/:product/latest", (req, res) => {
+  const product = downloadProducts[req.params.product];
+  if (!product) {
+    res.status(404).end();
+    return;
+  }
+
+  res.setHeader("Cache-Control", "no-store");
+  res.redirect(302, product.fileUrl);
+});
+
+app.get("/api/download/:product/latest", (req, res) => {
+  const productKey = req.params.product;
+  const product = downloadProducts[productKey];
+  if (!product) {
+    res.status(404).json({ ok: false, error: "下载产品不存在" });
+    return;
+  }
+
+  const visitorHash = getDownloadVisitorHash(req, res);
+  recordDownload({ product: productKey, version: product.version, visitorHash, now: Date.now() });
+  res.setHeader("Cache-Control", "no-store");
+  res.redirect(302, product.fileUrl);
+});
+
 app.post("/api/admin/login", (req, res) => {
   const password = normalizeText(req.body && req.body.password);
   const passwordHash = getSetting("admin_password_hash");
@@ -600,6 +733,59 @@ app.get("/api/admin/feedback", requireAdmin, (req, res) => {
   `).all();
 
   res.json({ ok: true, rows });
+});
+
+app.get("/api/admin/download-stats", requireAdmin, (req, res) => {
+  const today = getShanghaiDateKey();
+  const rows = db.prepare(`
+    SELECT
+      stats.product,
+      stats.version,
+      stats.download_count,
+      stats.first_download_at,
+      stats.last_download_at,
+      COALESCE(daily.download_count, 0) AS today_count
+    FROM download_stats AS stats
+    LEFT JOIN download_daily_stats AS daily
+      ON daily.product = stats.product
+      AND daily.version = stats.version
+      AND daily.download_date = ?
+    ORDER BY stats.last_download_at DESC
+  `).all(today);
+
+  for (const [productKey, product] of Object.entries(downloadProducts)) {
+    if (!rows.some(row => row.product === productKey && row.version === product.version)) {
+      rows.unshift({
+        product: productKey,
+        version: product.version,
+        download_count: 0,
+        first_download_at: null,
+        last_download_at: null,
+        today_count: 0,
+      });
+    }
+  }
+
+  const versions = rows.map(row => ({
+    ...row,
+    product_name: downloadProducts[row.product]?.name || row.product,
+    is_current: downloadProducts[row.product]?.version === row.version,
+  }));
+  const lastDownload = versions.reduce((latest, row) => {
+    if (!row.last_download_at) return latest;
+    return !latest || row.last_download_at > latest ? row.last_download_at : latest;
+  }, null);
+
+  res.setHeader("Cache-Control", "no-store");
+  res.json({
+    ok: true,
+    summary: {
+      total: versions.reduce((sum, row) => sum + row.download_count, 0),
+      today: versions.reduce((sum, row) => sum + row.today_count, 0),
+      last_download_at: lastDownload,
+    },
+    versions,
+  });
 });
 
 app.patch("/api/admin/feedback/:id/status", requireAdmin, (req, res) => {
