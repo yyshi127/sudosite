@@ -10,7 +10,7 @@
     />
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" type="image/png" href="./assets/xiaojing-app-icon.png?v=20260815-2" />
-    <link rel="stylesheet" href="./download.css?v=20260922-2" />
+    <link rel="stylesheet" href="./download.css?v=20261019-1" />
   </head>
   <body>
     <div class="download-page">
@@ -62,19 +62,22 @@
           </p>
 
           <div class="download-actions">
-            <a
-              class="windows-download is-preparing"
-              id="windows-download"
-              role="button"
-              download
-              aria-disabled="true"
-              tabindex="-1"
-            >
-              <svg class="windows-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z"></path>
-              </svg>
-              <span data-download-label data-i18n="downloadPreparing">Windows 版即将上线</span>
-            </a>
+            <div class="download-primary-action">
+              <a
+                class="windows-download is-preparing"
+                id="windows-download"
+                role="button"
+                download
+                aria-disabled="true"
+                tabindex="-1"
+              >
+                <svg class="windows-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z"></path>
+                </svg>
+                <span data-download-label data-i18n="downloadPreparing">Windows 版即将上线</span>
+              </a>
+              <span class="download-version" data-i18n="downloadVersion">版本 0.3.3 · 抢先版</span>
+            </div>
             <a class="download-feedback-link" href="./feedback.html">
               <span data-i18n="feedback">问题建议反馈</span>
             </a>
@@ -117,6 +120,6 @@
       </footer>
     </div>
 
-    <script src="./download.js?v=20261005-1"></script>
+    <script src="./download.js?v=20261019-1"></script>
   </body>
 </html>

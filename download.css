@@ -269,9 +269,25 @@ button {
 .download-actions {
   display: flex;
   margin-top: 32px;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.download-primary-action {
+  display: flex;
+  min-width: 220px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.download-version {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .download-feedback-link {
@@ -391,7 +407,7 @@ button {
   overflow: hidden;
   width: clamp(760px, 62vw, 1080px);
   flex: 0 0 auto;
-  aspect-ratio: 2160 / 1352;
+  aspect-ratio: 1920 / 1232;
   border: 1px solid rgba(201, 219, 220, 0.96);
   border-radius: 8px;
   background: #ffffff;
@@ -588,6 +604,10 @@ button {
   }
 
   .windows-download {
+    width: 100%;
+  }
+
+  .download-primary-action {
     width: 100%;
   }
 

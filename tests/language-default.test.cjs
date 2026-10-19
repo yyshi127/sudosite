@@ -57,6 +57,19 @@ async function waitForServer() {
     const downloadPage = await downloadContext.newPage();
     await downloadPage.goto(`http://www.sudotech.ai:${port}/download.html`, { waitUntil: "networkidle" });
     if (await downloadPage.locator("html").getAttribute("lang") !== "en") throw new Error("English download page should default to English");
+    if (await downloadPage.locator(".download-version").textContent() !== "Version 0.3.3 · Preview") {
+      throw new Error("English download page should show the 0.3.3 preview version");
+    }
+    if (!String(await downloadPage.locator(".product-window img").getAttribute("src")).endsWith("xiaojing-desktop-preview-en-0.3.3.png")) {
+      throw new Error("English download page should show the 0.3.3 product screenshot");
+    }
+    await downloadPage.locator('[data-lang-option="zh"]').click();
+    if (await downloadPage.locator(".download-version").textContent() !== "版本 0.3.3 · 抢先版") {
+      throw new Error("Chinese download page should show the 0.3.3 preview version");
+    }
+    if (!String(await downloadPage.locator(".product-window img").getAttribute("src")).endsWith("xiaojing-desktop-preview-0.3.3.png")) {
+      throw new Error("Chinese download page should show the 0.3.3 product screenshot");
+    }
 
     const chinaContext = await browser.newContext();
     const chinaPage = await chinaContext.newPage();
