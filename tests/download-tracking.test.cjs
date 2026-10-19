@@ -11,7 +11,7 @@ const port = 31849;
 const baseUrl = `http://127.0.0.1:${port}`;
 const password = "download-test-password";
 const trackingPath = "/api/download/xiaojing-accounting/latest";
-const expectedFile = "/downloads/xiaojing-accounting-0.3.2-20261004-windows-x64-setup.exe";
+const expectedFile = "/downloads/xiaojing-accounting-0.3.3-windows-x64-preview.exe";
 const server = spawn(process.execPath, ["server.js"], {
   cwd: root,
   env: { ...process.env, ADMIN_PASSWORD: password, DATA_DIR: testDir, PORT: String(port), HOST: "127.0.0.1" },
@@ -79,7 +79,7 @@ async function waitForServer() {
     const statsBody = await stats.json();
     assert.equal(statsBody.summary.total, 2);
     assert.equal(statsBody.summary.today, 2);
-    assert.equal(statsBody.versions[0].version, "0.3.2");
+    assert.equal(statsBody.versions[0].version, "0.3.3");
     assert.equal(statsBody.versions[0].download_count, 2);
 
     browser = await chromium.launch({ headless: true });

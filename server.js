@@ -29,8 +29,8 @@ const sessionCookieMaxAgeSeconds = Math.floor(sessionTtlMs / 1000);
 const downloadProducts = {
   "xiaojing-accounting": {
     name: "小兢会计桌面版",
-    version: "0.3.2",
-    fileUrl: "/downloads/xiaojing-accounting-0.3.2-20261004-windows-x64-setup.exe",
+    version: "0.3.3",
+    fileUrl: "/downloads/xiaojing-accounting-0.3.3-windows-x64-preview.exe",
   },
 };
 const downloadDedupeWindowMs = 10 * 60 * 1000;
