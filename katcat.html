@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Katcat.AI - 超级个人助理 | 数豆科技</title>
+    <meta
+      name="description"
+      content="Katcat.AI 是您的超级个人助理，陪您探索想法、推进任务，把想做的事一步步做成。"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" type="image/png" href="./assets/katcat-mascot-mark.png" />
+    <link rel="stylesheet" href="./katcat.css?v=20261022-1" />
+  </head>
+  <body>
+    <div class="katcat-page">
+      <header class="katcat-header">
+        <a class="katcat-brand" href="./" aria-label="返回数豆科技官网" data-i18n-aria="brandAria">
+          <img src="./assets/katcat-logo-web.png" alt="Katcat.AI" />
+        </a>
+
+        <div class="header-actions">
+          <div class="language-toggle" role="group" aria-label="切换语言" data-i18n-aria="languageAria">
+            <button class="language-option" type="button" data-lang-option="zh">中文</button>
+            <span class="language-divider" aria-hidden="true">/</span>
+            <button class="language-option" type="button" data-lang-option="en">EN</button>
+          </div>
+          <a class="home-link" href="./">
+            <span data-i18n="backHome">返回官网</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="m13 6 6 6-6 6"></path>
+            </svg>
+          </a>
+        </div>
+      </header>
+
+      <main class="katcat-hero">
+        <section class="katcat-copy" aria-labelledby="katcat-title">
+          <div class="product-signature">
+            <img src="./assets/katcat-mascot-mark.png" alt="" aria-hidden="true" />
+            <span>Personal Agent Desktop</span>
+          </div>
+
+          <h1 id="katcat-title">Katcat<span>.AI</span></h1>
+          <p class="product-tagline" data-i18n="tagline">您的超级个人助理</p>
+          <p class="product-description" data-i18n="description">
+            无论是一个天马行空的想法，还是一件想做成的事，都可以交给我一起探索、推进。
+          </p>
+
+          <div class="download-block">
+            <button class="windows-download" type="button" disabled>
+              <svg class="windows-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z"></path>
+              </svg>
+              <span data-i18n="downloadPreparing">Windows 版即将上线</span>
+            </button>
+            <span class="download-version" data-i18n="downloadVersion">版本 1.0.0</span>
+          </div>
+
+          <p class="release-status" role="status" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-i18n="releasePreparing">安装包正在准备中</span>
+          </p>
+
+          <div class="compatibility" aria-label="系统要求" data-i18n-aria="requirementsAria">
+            <span>Windows 10 / 11</span>
+            <span aria-hidden="true"></span>
+            <span data-i18n="requirementArch">64 位系统</span>
+            <span aria-hidden="true"></span>
+            <span data-i18n="requirementLanguage">简体中文</span>
+          </div>
+        </section>
+
+        <section class="product-visual" aria-label="Katcat.AI 系统界面" data-i18n-aria="previewRegionAria">
+          <div class="preview-toolbar">
+            <div class="theme-switcher" role="group" aria-label="界面主题" data-i18n-aria="themeAria">
+              <button class="theme-option" type="button" data-theme-option="light" aria-pressed="true">
+                <span class="theme-swatch light" aria-hidden="true"></span>
+                <span data-i18n="lightMode">浅色</span>
+              </button>
+              <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false">
+                <span class="theme-swatch dark" aria-hidden="true"></span>
+                <span data-i18n="darkMode">深色</span>
+              </button>
+            </div>
+          </div>
+          <div class="product-window">
+            <img
+              id="katcat-preview"
+              src="./assets/katcat-app-light.png"
+              alt="Katcat.AI Windows 桌面端浅色界面"
+            />
+          </div>
+        </section>
+      </main>
+
+      <footer class="katcat-footer">
+        <p data-i18n="copyright">© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</p>
+        <nav aria-label="法律信息" data-i18n-aria="legalAria">
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">苏ICP备2026055624号-1</a>
+          <a class="public-security-link" href="https://beian.mps.gov.cn/#/query/webSearch?code=32059002008413" target="_blank" rel="noopener noreferrer"><img src="./assets/public-security-badge.png" alt="" />苏公网安备32059002008413号</a>
+          <a href="./privacy.html" data-i18n="privacy">隐私政策</a>
+          <a href="./terms.html" data-i18n="terms">服务条款</a>
+        </nav>
+      </footer>
+    </div>
+
+    <script src="./katcat.js?v=20261022-3"></script>
+  </body>
+</html>
