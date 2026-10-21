@@ -41,7 +41,7 @@ async function waitForServer() {
     await desktop.goto(`http://www.sudotech.ai:${port}/katcat.html`, { waitUntil: "networkidle" });
     assert.equal(await desktop.locator("html").getAttribute("lang"), "en");
     assert.equal(await desktop.locator(".product-tagline").textContent(), "Your Super Personal Assistant");
-    assert.equal(await desktop.locator(".windows-download").getAttribute("href"), "./downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe");
+    assert.equal(await desktop.locator(".windows-download").getAttribute("href"), "./downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b");
     assert.equal(await desktop.locator(".windows-download").innerText(), "Download for Windows");
     assert.equal(await desktop.locator(".download-version").textContent(), "Version 1.0.0");
     assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-light-en\.png\?/);
