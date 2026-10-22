@@ -1,0 +1,22 @@
+.paper-companion {
+  position: fixed;
+  z-index: 10;
+  width: 180px;
+  height: 180px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.paper-companion[hidden] { display: none; }
+.paper-companion svg { display: block; width: 100%; height: 100%; overflow: hidden; pointer-events: none; transform-origin: 50% 92%; animation: companion-breathe 3.4s ease-in-out infinite; }
+.paper-companion.is-dragging { cursor: grabbing; }
+.paper-companion.is-dragging svg { animation-play-state: paused; }
+@keyframes companion-breathe { 50% { transform: translateY(-1.5px) scale(1.01); } }
+@media (max-width: 1799px) { .paper-companion { width: 130px; height: 130px; } }
+@media (max-width: 700px) { .paper-companion { width: 88px; height: 88px; } }
+@media (max-width: 1000px) { .hero-inner { padding-top: 150px; } }
+@media (prefers-reduced-motion: reduce) { .paper-companion svg { animation: none; } }

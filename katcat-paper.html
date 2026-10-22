@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Katcat.AI - Your Super Personal Assistant</title>
+    <meta name="description" content="Your super personal assistant. Explore ideas and move things forward with Katcat.AI." />
+    <meta name="theme-color" content="#fffaf3" />
+    <link rel="icon" href="./assets/katcat-mascot-mark.png" />
+    <link rel="stylesheet" href="./katcat-paper.css?v=20261022-5" />
+    <link rel="stylesheet" href="./katcat-paper-companion.css?v=20261022-4" />
+  </head>
+  <body>
+    <main>
+      <section class="paper-hero" aria-labelledby="product-title">
+        <img class="hero-art" src="./assets/katcat-paper-hero.png" alt="" fetchpriority="high" />
+        <header class="paper-header">
+          <a class="brand" href="./katcat-paper.html" aria-label="Katcat.AI"><img src="./assets/katcat-logo-web.png" alt="Katcat.AI" width="144" /></a>
+          <div class="header-actions">
+            <div class="language-toggle" role="group" aria-label="Language" data-i18n-aria="languageAria">
+              <button type="button" data-lang-option="zh">中文</button>
+              <button type="button" data-lang-option="en">EN</button>
+            </div>
+            <a class="home-link" href="./" data-i18n-aria="brandAria"><span data-i18n="backHome">Back to site</span><span aria-hidden="true">↗</span></a>
+          </div>
+        </header>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="tiny-line" aria-hidden="true"></span> PERSONAL AGENT DESKTOP</p>
+            <h1 id="product-title">Katcat<span>.AI</span></h1>
+            <p class="tagline" data-i18n="tagline">Your Super Personal Assistant</p>
+            <p class="description" data-i18n="description">Whether it starts as a wild idea or something you want to make real, bring it to me and we will explore it and move it forward together.</p>
+            <a class="download-link" href="https://www.sudotech.ai/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b" download>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z" /></svg>
+              <span data-i18n="downloadReady">Download for Windows</span>
+              <span class="download-arrow" aria-hidden="true">↓</span>
+            </a>
+            <p class="release-meta"><span class="status-dot" aria-hidden="true"></span><span data-i18n="downloadVersion">Version 1.0.0</span><span class="meta-divider" aria-hidden="true">/</span><span>Windows 10 / 11 · x64</span></p>
+          </div>
+        </div>
+        <a class="scroll-link" href="#workspace" aria-label="View Katcat workspace"><span>Katcat Workspace</span><span aria-hidden="true">↓</span></a>
+      </section>
+
+      <section class="workspace" id="workspace" aria-label="Katcat.AI product interface" data-i18n-aria="previewRegionAria">
+        <div class="workspace-inner">
+          <div class="workspace-heading">
+            <div><p class="eyebrow">KATCAT DESKTOP</p><h2>Katcat Workspace<span class="heading-dot">.</span></h2></div>
+            <div class="theme-switcher" role="group" aria-label="Interface theme" data-i18n-aria="themeAria">
+              <button type="button" data-theme-option="light"><span class="swatch light" aria-hidden="true"></span><span data-i18n="lightMode">Light</span></button>
+              <button type="button" data-theme-option="dark"><span class="swatch dark" aria-hidden="true"></span><span data-i18n="darkMode">Dark</span></button>
+            </div>
+          </div>
+          <img id="katcat-preview" class="app-preview" src="./assets/katcat-app-light-en.png?v=20261022-2" alt="Katcat.AI Windows desktop in light mode" width="1920" height="1232" loading="lazy" />
+        </div>
+      </section>
+    </main>
+    <footer class="paper-footer"><a href="#product-title" class="footer-wordmark">Katcat<span>.AI</span></a><nav aria-label="Legal information" data-i18n-aria="legalAria"><a href="./katcat-paper-privacy.html" data-i18n="privacy">Privacy Policy</a><a href="./katcat-paper-terms.html" data-i18n="terms">Terms of Service</a></nav></footer>
+    <button type="button" class="paper-companion" id="paper-companion" aria-label="Drag Katcat" title="Drag to move; arrow keys also move Katcat" hidden>
+      <svg viewBox="12 26 354 354" aria-hidden="true" focusable="false"><image href="./assets/katcat-companion-motions.png" width="1448" height="1086" /></svg>
+    </button>
+    <script src="./katcat.js?v=20261022-4"></script>
+    <script src="./katcat-paper-companion.js?v=20261022-4"></script>
+  </body>
+</html>
