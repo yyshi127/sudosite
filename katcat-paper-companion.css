@@ -18,5 +18,12 @@
 @keyframes companion-breathe { 50% { transform: translateY(-1.5px) scale(1.01); } }
 @media (max-width: 1799px) { .paper-companion { width: 130px; height: 130px; } }
 @media (max-width: 700px) { .paper-companion { width: 88px; height: 88px; } }
+.workspace { padding-left: max(56px, var(--companion-lane, 56px)); }
 @media (max-width: 1000px) { .hero-inner { padding-top: 150px; } }
+@media (max-width: 1000px) {
+  .workspace { padding-left: max(20px, var(--companion-lane, 20px)); }
+  .workspace-heading h2 { font-size: 22px; }
+  .workspace-heading .theme-switcher { align-self: flex-start; }
+  .workspace-heading .theme-switcher button { padding: 0 6px; gap: 4px; font-size: 11px; }
+}
 @media (prefers-reduced-motion: reduce) { .paper-companion svg { animation: none; } }

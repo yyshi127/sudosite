@@ -1,112 +1,64 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
-    <script src="./site-footer.js?v=20261022-1"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Katcat.AI - 超级个人助理 | 数豆科技</title>
-    <meta
-      name="description"
-      content="Katcat.AI 是您的超级个人助理，陪您探索想法、推进任务，把想做的事一步步做成。"
-    />
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="icon" type="image/png" href="./assets/katcat-mascot-mark.png" />
-    <link rel="stylesheet" href="./katcat.css?v=20261022-2" />
+    <title>Katcat.AI - Your Super Personal Assistant</title>
+    <meta name="description" content="Your super personal assistant. Explore ideas and move things forward with Katcat.AI." />
+    <meta name="theme-color" content="#fffaf3" />
+    <link rel="icon" href="./assets/katcat-mascot-mark.png" />
+    <link rel="stylesheet" href="./katcat-paper.css?v=20261022-7" />
+    <link rel="stylesheet" href="./katcat-paper-companion.css?v=20261022-6" />
   </head>
   <body>
-    <div class="katcat-page">
-      <header class="katcat-header">
-        <a class="katcat-brand" href="./" aria-label="返回数豆科技官网" data-i18n-aria="brandAria">
-          <img src="./assets/katcat-logo-web.png" alt="Katcat.AI" />
-        </a>
-
-        <div class="header-actions">
-          <div class="language-toggle" role="group" aria-label="切换语言" data-i18n-aria="languageAria">
-            <button class="language-option" type="button" data-lang-option="zh">中文</button>
-            <span class="language-divider" aria-hidden="true">/</span>
-            <button class="language-option" type="button" data-lang-option="en">EN</button>
+    <main>
+      <section class="paper-hero" aria-labelledby="product-title">
+        <img class="hero-art" src="./assets/katcat-paper-hero.png" alt="" fetchpriority="high" />
+        <header class="paper-header">
+          <a class="brand" href="./katcat.html" aria-label="Katcat.AI"><img src="./assets/katcat-logo-web.png" alt="Katcat.AI" width="144" /></a>
+          <div class="header-actions">
+            <div class="language-toggle" role="group" aria-label="Language" data-i18n-aria="languageAria">
+              <button type="button" data-lang-option="zh">中文</button>
+              <button type="button" data-lang-option="en">EN</button>
+            </div>
+            <a class="home-link" href="./" data-i18n-aria="brandAria"><span data-i18n="backHome">Back to site</span><span aria-hidden="true">↗</span></a>
           </div>
-          <a class="home-link" href="./">
-            <span data-i18n="backHome">返回官网</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h14"></path>
-              <path d="m13 6 6 6-6 6"></path>
-            </svg>
-          </a>
-        </div>
-      </header>
-
-      <main class="katcat-hero">
-        <section class="katcat-copy" aria-labelledby="katcat-title">
-          <div class="product-signature">
-            <img src="./assets/katcat-mascot-mark.png" alt="" aria-hidden="true" />
-            <span>Personal Agent Desktop</span>
-          </div>
-
-          <h1 id="katcat-title">Katcat<span>.AI</span></h1>
-          <p class="product-tagline" data-i18n="tagline">您的超级个人助理</p>
-          <p class="product-description" data-i18n="description">
-            无论是一个天马行空的想法，还是一件想做成的事，都可以交给我一起探索、推进。
-          </p>
-
-          <div class="download-block">
-            <a class="windows-download" href="./downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b" download>
-              <svg class="windows-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z"></path>
-              </svg>
-              <span data-i18n="downloadReady">下载 Windows 版</span>
+        </header>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="tiny-line" aria-hidden="true"></span> PERSONAL AGENT DESKTOP</p>
+            <h1 id="product-title">Katcat<span>.AI</span></h1>
+            <p class="tagline" data-i18n="tagline">Your Super Personal Assistant</p>
+            <p class="description" data-i18n="description">Whether it starts as a wild idea or something you want to make real, bring it to me and we will explore it and move it forward together.</p>
+            <a class="download-link" href="https://www.sudotech.ai/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b" download>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z" /></svg>
+              <span data-i18n="downloadReady">Download for Windows</span>
+              <span class="download-arrow" aria-hidden="true">↓</span>
             </a>
-            <span class="download-version" data-i18n="downloadVersion">版本 1.0.0</span>
+            <p class="release-meta"><span class="status-dot" aria-hidden="true"></span><span data-i18n="downloadVersion">Version 1.0.0</span><span class="meta-divider" aria-hidden="true">/</span><span>Windows 10 / 11 · x64</span></p>
           </div>
+        </div>
+        <a class="scroll-link" href="#workspace" aria-label="View Katcat workspace"><span>Katcat Workspace</span><span aria-hidden="true">↓</span></a>
+      </section>
 
-          <p class="release-status" role="status" aria-live="polite">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span data-i18n="releaseReady">官方下载已开放</span>
-          </p>
-
-          <div class="compatibility" aria-label="系统要求" data-i18n-aria="requirementsAria">
-            <span>Windows 10 / 11</span>
-            <span aria-hidden="true"></span>
-            <span data-i18n="requirementArch">64 位系统</span>
-            <span aria-hidden="true"></span>
-            <span data-i18n="requirementLanguage">简体中文</span>
-          </div>
-        </section>
-
-        <section class="product-visual" aria-label="Katcat.AI 系统界面" data-i18n-aria="previewRegionAria">
-          <div class="preview-toolbar">
-            <div class="theme-switcher" role="group" aria-label="界面主题" data-i18n-aria="themeAria">
-              <button class="theme-option" type="button" data-theme-option="light" aria-pressed="true">
-                <span class="theme-swatch light" aria-hidden="true"></span>
-                <span data-i18n="lightMode">浅色</span>
-              </button>
-              <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false">
-                <span class="theme-swatch dark" aria-hidden="true"></span>
-                <span data-i18n="darkMode">深色</span>
-              </button>
+      <section class="workspace" id="workspace" aria-label="Katcat.AI product interface" data-i18n-aria="previewRegionAria">
+        <div class="workspace-inner">
+          <div class="workspace-heading">
+            <div><p class="eyebrow">KATCAT DESKTOP</p><h2>Katcat Workspace<span class="heading-dot">.</span></h2></div>
+            <div class="theme-switcher" role="group" aria-label="Interface theme" data-i18n-aria="themeAria">
+              <button type="button" data-theme-option="light"><span class="swatch light" aria-hidden="true"></span><span data-i18n="lightMode">Light</span></button>
+              <button type="button" data-theme-option="dark"><span class="swatch dark" aria-hidden="true"></span><span data-i18n="darkMode">Dark</span></button>
             </div>
           </div>
-          <div class="product-window">
-            <img
-              id="katcat-preview"
-              src="./assets/katcat-app-light.png"
-              alt="Katcat.AI Windows 桌面端浅色界面"
-            />
-          </div>
-        </section>
-      </main>
-
-      <footer class="katcat-footer">
-        <p data-i18n="copyright">© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</p>
-        <nav aria-label="法律信息" data-i18n-aria="legalAria">
-          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">苏ICP备2026055624号-1</a>
-          <a class="public-security-link" href="https://beian.mps.gov.cn/#/query/webSearch?code=32059002008413" target="_blank" rel="noopener noreferrer"><img src="./assets/public-security-badge.png" alt="" />苏公网安备32059002008413号</a>
-          <a href="./privacy.html" data-i18n="privacy">隐私政策</a>
-          <a href="./terms.html" data-i18n="terms">服务条款</a>
-        </nav>
-      </footer>
-    </div>
-
+          <img id="katcat-preview" class="app-preview" src="./assets/katcat-app-light-en.png?v=20261022-2" alt="Katcat.AI Windows desktop in light mode" width="1920" height="1232" loading="lazy" />
+        </div>
+      </section>
+    </main>
+    <footer class="paper-footer"><a href="#product-title" class="footer-wordmark">Katcat<span>.AI</span></a><nav aria-label="Legal information" data-i18n-aria="legalAria"><a href="./katcat-paper-privacy.html" data-i18n="privacy">Privacy Policy</a><a href="./katcat-paper-terms.html" data-i18n="terms">Terms of Service</a></nav></footer>
+    <button type="button" class="paper-companion" id="paper-companion" aria-label="Drag Katcat" title="Drag to move; arrow keys also move Katcat" hidden>
+      <svg viewBox="12 26 354 354" aria-hidden="true" focusable="false"><image href="./assets/katcat-companion-motions.png" width="1448" height="1086" /></svg>
+    </button>
     <script src="./katcat.js?v=20261022-4"></script>
+    <script src="./katcat-paper-companion.js?v=20261022-6"></script>
   </body>
 </html>

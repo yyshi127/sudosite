@@ -50,17 +50,15 @@
   }
   function initialPosition() {
     const anchor = document.querySelector(".hero-copy .eyebrow").getBoundingClientRect();
-    const title = document.querySelector("#product-title").getBoundingClientRect();
     const header = document.querySelector(".paper-header").getBoundingClientRect();
     const gap = 24;
-    const preferredSize = innerWidth <= 700 ? 88 : 180;
-    const fitsLeft = anchor.left >= preferredSize + 48;
-    const size = fitsLeft ? preferredSize : Math.max(24, Math.min(preferredSize, anchor.top - header.bottom - gap - 8));
+    const preferredSize = innerWidth <= 1000 ? 88 : 180;
+    const size = Math.max(24, Math.min(preferredSize, anchor.top - header.bottom - gap - 8));
     cat.style.width = `${size}px`;
     cat.style.height = `${size}px`;
     // Reconstruct the initial viewport placement even when resizing after scrolling.
-    move(fitsLeft ? anchor.left - size - 40 : anchor.left,
-      (fitsLeft ? title.bottom - size : anchor.top - size - gap) + scrollY);
+    move(anchor.left, anchor.top - size - gap + scrollY);
+    document.documentElement.style.setProperty("--companion-lane", `${anchor.left + size + 32}px`);
   }
   function updateLabel() {
     const chinese = document.documentElement.lang.startsWith("zh");
@@ -106,13 +104,16 @@
     move(box.left + delta[0], box.top + delta[1]);
   });
   addEventListener("resize", () => {
-    if (!positioned) return initialPosition();
     const box = cat.getBoundingClientRect();
-    move(box.left, box.top);
+    initialPosition();
+    if (positioned) move(box.left, box.top);
   });
   document.addEventListener("visibilitychange", () => { stopMotion(); schedule(); });
   reducedMotion.addEventListener("change", () => { stopMotion(); schedule(); });
-  new MutationObserver(updateLabel).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  new MutationObserver(() => {
+    updateLabel();
+    if (!positioned && !cat.hidden) initialPosition();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   new ResizeObserver(() => { if (!positioned && !cat.hidden) initialPosition(); }).observe(document.querySelector(".hero-copy"));
   updateLabel();
   const image = new Image();

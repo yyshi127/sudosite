@@ -40,10 +40,10 @@ async function waitForServer() {
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await desktop.goto(`http://www.sudotech.ai:${port}/katcat.html`, { waitUntil: "networkidle" });
     assert.equal(await desktop.locator("html").getAttribute("lang"), "en");
-    assert.equal(await desktop.locator(".product-tagline").textContent(), "Your Super Personal Assistant");
-    assert.equal(await desktop.locator(".windows-download").getAttribute("href"), "./downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b");
-    assert.equal(await desktop.locator(".windows-download").innerText(), "Download for Windows");
-    assert.equal(await desktop.locator(".download-version").textContent(), "Version 1.0.0");
+    assert.equal(await desktop.locator(".tagline").textContent(), "Your Super Personal Assistant");
+    assert.equal(await desktop.locator(".download-link").getAttribute("href"), "https://www.sudotech.ai/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b");
+    assert.equal(await desktop.locator('[data-i18n="downloadReady"]').innerText(), "Download for Windows");
+    assert.equal(await desktop.locator("[data-i18n=\"downloadVersion\"]").textContent(), "Version 1.0.0");
     assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-light-en\.png\?/);
     assert.equal(await desktop.locator(".theme-switcher").isVisible(), true);
     await desktop.locator("#katcat-preview").evaluate(image => image.decode());
@@ -55,15 +55,15 @@ async function waitForServer() {
 
     await desktop.locator('[data-lang-option="zh"]').click();
     assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-dark\.png$/);
-    assert.equal(await desktop.locator(".product-tagline").textContent(), "您的超级个人助理");
+    assert.equal(await desktop.locator(".tagline").textContent(), "您的超级个人助理");
     assert.equal(
-      await desktop.locator(".product-description").textContent().then(value => value.trim()),
+      await desktop.locator(".description").textContent().then(value => value.trim()),
       "无论是一个天马行空的想法，还是一件想做成的事，都可以交给我一起探索、推进。"
     );
 
     const desktopLayout = await desktop.evaluate(() => {
-      const copy = document.querySelector(".katcat-copy").getBoundingClientRect();
-      const preview = document.querySelector(".product-window").getBoundingClientRect();
+      const copy = document.querySelector(".hero-copy").getBoundingClientRect();
+      const preview = document.querySelector(".app-preview").getBoundingClientRect();
       return { copyLeft: copy.left, previewLeft: preview.left, viewportWidth: window.innerWidth };
     });
     assert.ok(desktopLayout.copyLeft >= 0, "desktop copy must remain inside the viewport");
@@ -80,12 +80,12 @@ async function waitForServer() {
       const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height } });
       await page.goto(`http://127.0.0.1:${port}/katcat.html`, { waitUntil: "networkidle" });
       const layout = await page.evaluate(() => {
-        const copy = document.querySelector(".katcat-copy").getBoundingClientRect();
-        const preview = document.querySelector(".product-window").getBoundingClientRect();
-        return { copyLeft: copy.left, copyRight: copy.right, previewLeft: preview.left };
+        const copy = document.querySelector(".hero-copy").getBoundingClientRect();
+        const preview = document.querySelector(".app-preview").getBoundingClientRect();
+        return { copyLeft: copy.left, copyBottom: copy.bottom, previewTop: preview.top };
       });
       assert.ok(layout.copyLeft >= 0, `${viewport.name}: copy must not be clipped`);
-      assert.ok(layout.copyRight <= layout.previewLeft, `${viewport.name}: copy and preview must not overlap`);
+      assert.ok(layout.copyBottom <= layout.previewTop, `${viewport.name}: copy and preview must not overlap`);
       await page.screenshot({ path: path.join(root, "test-results", `katcat-${viewport.name}.png`) });
       await page.close();
     }

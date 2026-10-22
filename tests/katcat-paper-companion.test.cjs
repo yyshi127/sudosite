@@ -8,15 +8,14 @@ const { chromium } = require("playwright");
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
     await page.clock.install();
-    await page.goto(`${process.env.PREVIEW_URL || "http://127.0.0.1:3000"}/katcat-paper.html`);
+    await page.goto(`${process.env.PREVIEW_URL || "http://127.0.0.1:3000"}/${process.env.PREVIEW_PAGE || "katcat-paper.html"}`);
     const cat = page.locator("#paper-companion");
     const sprite = cat.locator("svg");
     await cat.waitFor({ state: "visible" });
     const anchor = await page.locator(".hero-copy .eyebrow").boundingBox();
     const initial = await cat.boundingBox();
-    const title = await page.locator("#product-title").boundingBox();
-    assert.equal(initial.x + initial.width, anchor.x - 40);
-    assert.equal(initial.y + initial.height, title.y + title.height);
+    assert.equal(initial.x, anchor.x);
+    assert.equal(initial.y + initial.height, anchor.y - 24);
     await page.evaluate(() => {
       document.documentElement.style.scrollBehavior = "auto";
       scrollTo(0, document.querySelector(".workspace").offsetTop);
@@ -69,6 +68,7 @@ const { chromium } = require("playwright");
       await page.setViewportSize({ width, height: 768 });
       box = await cat.boundingBox();
       assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.width <= width && box.y + box.height <= 768);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
@@ -81,6 +81,29 @@ const { chromium } = require("playwright");
     await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
     assert.ok((await cat.boundingBox()).x < box.x);
     assert.equal(await cat.evaluate(node => node.classList.contains("is-dragging")), false);
+    for (const width of [320, 390, 820, 1024, 1280, 1366, 1440, 1920, 2400, 3440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.reload();
+      await cat.waitFor({ state: "visible" });
+      for (const language of ["en", "zh"]) {
+        await page.locator(`[data-lang-option="${language}"]`).click();
+        await page.clock.runFor(50);
+        const catBox = await cat.boundingBox();
+        const eyebrow = await page.locator(".hero-copy .eyebrow").boundingBox();
+        assert.equal(catBox.x, eyebrow.x);
+        assert.ok(Math.abs(catBox.y + catBox.height - eyebrow.y + 24) < 1);
+        const screenshot = await page.locator(".app-preview").boundingBox();
+        const heading = await page.locator(".workspace-heading").boundingBox();
+        assert.ok(catBox.x + catBox.width + 24 <= screenshot.x);
+        assert.ok(catBox.x + catBox.width + 24 <= heading.x);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      }
+      if (width === 1366 || width === 390) {
+        await page.evaluate(() => { document.documentElement.style.scrollBehavior = "auto"; scrollTo(0, document.querySelector(".workspace").offsetTop); });
+        await page.screenshot({ path: `test-results/paper-cat-workspace-${width}.png` });
+        await page.evaluate(() => scrollTo(0, 0));
+      }
+    }
     assert.deepEqual(errors, []);
     console.log("PASS: all 12 frames, drag, bounds, keyboard, reduced motion, resize and cancellation.");
   } finally {
