@@ -63,9 +63,9 @@ h2 { font-size: 29px; font-weight: 600; margin: 0; line-height: 1.25; letter-spa
 .paper-footer nav { display: flex; gap: 24px; font-size: 12px; color: #70747c; }
 .paper-footer nav a:hover { color: var(--red); }
 @media (min-width: 1001px) {
-  .workspace { height: calc(100svh - 100px); display: flex; align-items: center; }
+  .workspace { height: calc(100svh - 100px); display: flex; align-items: center; padding-right: max(56px, calc((100% - var(--page-width)) / 2)); }
   /* Reserve the footer, section padding and heading before sizing the screenshot. */
-  .workspace-inner { width: min(100%, 1080px, calc((100svh - 296px) * 1920 / 1232)); }
+  .workspace-inner { width: min(100%, 1024px, calc((100svh - 296px) * 1920 / 1232 * .95)); margin: auto auto auto 0; }
 }
 @media (min-width: 1001px) and (max-height: 720px) {
   .paper-header { height: 72px; }

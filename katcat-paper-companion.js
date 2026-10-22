@@ -58,7 +58,8 @@
     cat.style.height = `${size}px`;
     // Reconstruct the initial viewport placement even when resizing after scrolling.
     move(anchor.left, anchor.top - size - gap + scrollY);
-    document.documentElement.style.setProperty("--companion-lane", `${anchor.left + size + 32}px`);
+    const workspaceGap = innerWidth > 1000 ? 76 : 32;
+    document.documentElement.style.setProperty("--companion-lane", `${anchor.left + size + workspaceGap}px`);
   }
   function updateLabel() {
     const chinese = document.documentElement.lang.startsWith("zh");

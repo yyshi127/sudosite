@@ -96,6 +96,11 @@ const { chromium } = require("playwright");
         const heading = await page.locator(".workspace-heading").boundingBox();
         assert.ok(catBox.x + catBox.width + 24 <= screenshot.x);
         assert.ok(catBox.x + catBox.width + 24 <= heading.x);
+        if (width > 1000) {
+          const footerNav = await page.locator(".paper-footer nav").boundingBox();
+          assert.ok(Math.abs(screenshot.x - catBox.x - catBox.width - 76) < 1);
+          assert.ok(screenshot.x + screenshot.width <= footerNav.x + footerNav.width + 1);
+        }
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
       }
       if (width === 1366 || width === 390) {
