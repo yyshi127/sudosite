@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { isIP } = require("node:net");
 
 const Database = require("better-sqlite3");
 const express = require("express");
@@ -32,8 +33,19 @@ const downloadProducts = {
     version: "0.3.3",
     fileUrl: "/downloads/xiaojing-accounting-0.3.3-windows-x64-preview.exe",
   },
+  katcat: {
+    name: "Katcat.AI",
+    version: "1.0.2",
+    fileUrl: "/downloads/Katcat.AI-V1.0.2-Windows-x64-20261023.exe",
+  },
 };
 const downloadDedupeWindowMs = 10 * 60 * 1000;
+const katcatInstallerPaths = [
+  "/downloads/Katcat.AI-V1.0.2-Windows-x64-20261023.exe",
+  "/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe",
+  "/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022-Preview.exe",
+];
+const katcatInstallerRoute = "/api/download/katcat/installer";
 
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(feedbackUploadDir, { recursive: true });
@@ -102,6 +114,24 @@ db.prepare(`
   )
 `).run();
 db.prepare("CREATE INDEX IF NOT EXISTS download_visitors_time_idx ON download_visitors(last_counted_at)").run();
+db.exec(`
+  CREATE TABLE IF NOT EXISTS download_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product TEXT NOT NULL,
+    version TEXT NOT NULL,
+    ip_address TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS download_events_time_idx ON download_events(created_at);
+`);
+
+function pruneDownloadEvents() {
+  db.prepare("DELETE FROM download_events WHERE created_at < ?")
+    .run(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString());
+}
+pruneDownloadEvents();
+setInterval(pruneDownloadEvents, 60 * 60 * 1000).unref();
 
 const feedbackColumns = db.prepare("PRAGMA table_info(feedback_items)").all().map(column => column.name);
 if (!feedbackColumns.includes("dedupe_hash")) {
@@ -358,7 +388,7 @@ function getShanghaiDateKey(timestamp = Date.now()) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-const recordDownload = db.transaction(({ product, version, visitorHash, now }) => {
+const recordDownload = db.transaction(({ product, version, visitorHash, ipAddress, now, fileUrl = downloadProducts[product].fileUrl }) => {
   const previous = db.prepare(`
     SELECT last_counted_at FROM download_visitors
     WHERE product = ? AND version = ? AND visitor_hash = ?
@@ -389,6 +419,12 @@ const recordDownload = db.transaction(({ product, version, visitorHash, now }) =
     ON CONFLICT(product, version, download_date)
     DO UPDATE SET download_count = download_count + 1
   `).run(product, version, dateKey);
+  if (product === "katcat") {
+    db.prepare(`
+      INSERT INTO download_events (product, version, ip_address, file_url, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(product, version, ipAddress, fileUrl, timestamp);
+  }
   db.prepare("DELETE FROM download_visitors WHERE last_counted_at < ?").run(now - 30 * 24 * 60 * 60 * 1000);
   return true;
 });
@@ -624,28 +660,57 @@ app.post("/api/feedback", async (req, res) => {
 });
 
 app.head("/api/download/:product/latest", (req, res) => {
-  const product = downloadProducts[req.params.product];
+  const product = Object.hasOwn(downloadProducts, req.params.product) ? downloadProducts[req.params.product] : null;
   if (!product) {
     res.status(404).end();
     return;
   }
 
   res.setHeader("Cache-Control", "no-store");
-  res.redirect(302, product.fileUrl);
+  res.redirect(302, req.params.product === "katcat" ? katcatInstallerRoute : product.fileUrl);
 });
 
 app.get("/api/download/:product/latest", (req, res) => {
   const productKey = req.params.product;
-  const product = downloadProducts[productKey];
+  const product = Object.hasOwn(downloadProducts, productKey) ? downloadProducts[productKey] : null;
   if (!product) {
     res.status(404).json({ ok: false, error: "下载产品不存在" });
     return;
   }
 
   const visitorHash = getDownloadVisitorHash(req, res);
-  recordDownload({ product: productKey, version: product.version, visitorHash, now: Date.now() });
+  // req.ip follows the trusted loopback proxy; do not read client-supplied IP headers directly.
+  const address = (req.ip || "").replace(/^::ffff:/i, "");
+  const ipAddress = isIP(address) ? address : "unknown";
+  recordDownload({ product: productKey, version: product.version, visitorHash, ipAddress, now: Date.now() });
   res.setHeader("Cache-Control", "no-store");
-  res.redirect(302, product.fileUrl);
+  res.redirect(302, productKey === "katcat" ? katcatInstallerRoute : product.fileUrl);
+});
+
+app.get(katcatInstallerRoute, (req, res, next) => {
+  if (req.query.release !== undefined && !["original", "preview"].includes(req.query.release)) return res.status(404).end();
+  const fileUrl = req.query.release === "original" ? katcatInstallerPaths[1]
+    : req.query.release === "preview" ? katcatInstallerPaths[2] : katcatInstallerPaths[0];
+  res.setHeader("Cache-Control", "private, no-store, no-cache, max-age=0, must-revalidate");
+  if (req.method === "GET" && (!req.headers.range || /^bytes=0-/i.test(req.headers.range))) {
+    const visitorHash = getDownloadVisitorHash(req, res);
+    const address = (req.ip || "").replace(/^::ffff:/i, "");
+    const now = Date.now();
+    res.once("finish", () => {
+      if (res.statusCode !== 200 && res.statusCode !== 206) return;
+      try {
+        recordDownload({ product: "katcat", version: req.query.release ? "1.0.0" : downloadProducts.katcat.version, visitorHash,
+          ipAddress: isIP(address) ? address : "unknown", now,
+          fileUrl: fileUrl === katcatInstallerPaths[0] ? downloadProducts.katcat.fileUrl : fileUrl });
+      } catch (error) { console.error("Failed to record installer download:", error); }
+    });
+  }
+  res.setHeader("Content-Disposition", `attachment; filename="${path.basename(fileUrl)}"`);
+  res.sendFile(path.join(rootDir, fileUrl), { cacheControl: false }, error => {
+    if (!error) return;
+    if (!res.headersSent && [404, 416].includes(error.status)) return res.status(error.status).end();
+    next(error);
+  });
 });
 
 app.post("/api/admin/login", (req, res) => {
@@ -736,6 +801,14 @@ app.get("/api/admin/feedback", requireAdmin, (req, res) => {
 });
 
 app.get("/api/admin/download-stats", requireAdmin, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const productFilter = req.query.product || "all";
+  const requestedPage = Number(req.query.page || 1);
+  if ((productFilter !== "all" && !Object.hasOwn(downloadProducts, productFilter))
+      || !Number.isSafeInteger(requestedPage) || requestedPage < 1) {
+    res.status(400).json({ ok: false, error: "产品或页码无效" });
+    return;
+  }
   const today = getShanghaiDateKey();
   const rows = db.prepare(`
     SELECT
@@ -766,7 +839,7 @@ app.get("/api/admin/download-stats", requireAdmin, (req, res) => {
     }
   }
 
-  const versions = rows.map(row => ({
+  const versions = rows.filter(row => productFilter === "all" || row.product === productFilter).map(row => ({
     ...row,
     product_name: downloadProducts[row.product]?.name || row.product,
     is_current: downloadProducts[row.product]?.version === row.version,
@@ -775,6 +848,18 @@ app.get("/api/admin/download-stats", requireAdmin, (req, res) => {
     if (!row.last_download_at) return latest;
     return !latest || row.last_download_at > latest ? row.last_download_at : latest;
   }, null);
+
+  const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const eventProduct = productFilter === "all" ? "katcat" : productFilter;
+  const eventTotal = db.prepare("SELECT COUNT(*) AS total FROM download_events WHERE product = ? AND created_at >= ?")
+    .get(eventProduct, cutoff).total;
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(eventTotal / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const events = db.prepare(`
+    SELECT id, product, version, ip_address, file_url, created_at FROM download_events
+    WHERE product = ? AND created_at >= ? ORDER BY id DESC LIMIT ? OFFSET ?
+  `).all(eventProduct, cutoff, pageSize, (page - 1) * pageSize);
 
   res.setHeader("Cache-Control", "no-store");
   res.json({
@@ -785,6 +870,8 @@ app.get("/api/admin/download-stats", requireAdmin, (req, res) => {
       last_download_at: lastDownload,
     },
     versions,
+    events,
+    pagination: { page, page_size: pageSize, total: eventTotal, total_pages: totalPages },
   });
 });
 
@@ -1026,6 +1113,19 @@ app.use((req, res, next) => {
   }
 
   next();
+});
+
+app.use((req, res, next) => {
+  let pathname;
+  try { pathname = decodeURIComponent(req.path); } catch { return next(); }
+  if (!katcatInstallerPaths.includes(pathname) || !["GET", "HEAD"].includes(req.method)) return next();
+
+  res.setHeader("Cache-Control", "private, no-store, no-cache, max-age=0, must-revalidate");
+  res.setHeader("CDN-Cache-Control", "no-store");
+  res.setHeader("Cloudflare-CDN-Cache-Control", "no-store");
+  // Avoid extension-based CDN caching by serving bytes through the API URL.
+  res.redirect(302, katcatInstallerRoute + (pathname === katcatInstallerPaths[1] ? "?release=original"
+    : pathname === katcatInstallerPaths[2] ? "?release=preview" : ""));
 });
 
 app.use(express.static(rootDir, {

@@ -34,6 +34,14 @@ const downloadTotal = document.querySelector("#download-admin-total");
 const downloadToday = document.querySelector("#download-admin-today");
 const downloadLast = document.querySelector("#download-admin-last");
 const downloadVersions = document.querySelector("#download-admin-versions");
+const downloadProduct = document.querySelector("#download-admin-product");
+const downloadDetails = document.querySelector("#download-admin-details");
+const downloadEvents = document.querySelector("#download-admin-events");
+const downloadPageLabel = document.querySelector("#download-admin-page");
+const downloadPrev = document.querySelector("#download-admin-prev");
+const downloadNext = document.querySelector("#download-admin-next");
+let downloadPage = 1;
+let downloadRequestId = 0;
 let currentRows = [];
 let currentFilter = "all";
 let selectedIds = new Set();
@@ -339,6 +347,12 @@ function closeDeleteModal() {
 }
 
 function clearDownloadStats() {
+  downloadRequestId += 1;
+  downloadPage = 1;
+  downloadEvents.replaceChildren();
+  downloadPageLabel.textContent = "";
+  downloadPrev.disabled = true;
+  downloadNext.disabled = true;
   downloadTotal.textContent = "0";
   downloadToday.textContent = "0";
   downloadLast.textContent = "暂无";
@@ -394,18 +408,46 @@ function renderDownloadStats(result) {
     });
     downloadVersions.appendChild(tableRow);
   });
+  downloadDetails.hidden = downloadProduct.value === "xiaojing-accounting";
+  downloadEvents.replaceChildren();
+  result.events.forEach(row => {
+    const tr = document.createElement("tr");
+    [formatDownloadTime(row.created_at), row.version, row.ip_address, row.file_url].forEach(value => {
+      const td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+    downloadEvents.appendChild(tr);
+  });
+  if (!result.events.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.textContent = "暂无下载明细";
+    tr.appendChild(td);
+    downloadEvents.appendChild(tr);
+  }
+  downloadPage = result.pagination.page;
+  downloadPageLabel.textContent = `第 ${downloadPage} / ${result.pagination.total_pages} 页，共 ${result.pagination.total} 条`;
+  downloadPrev.disabled = downloadPage <= 1;
+  downloadNext.disabled = downloadPage >= result.pagination.total_pages;
 }
 
 async function loadDownloadStats() {
+  const requestId = ++downloadRequestId;
+  downloadPrev.disabled = true;
+  downloadNext.disabled = true;
   setStatus(downloadDashboardStatus, "正在加载下载统计...");
 
   try {
-    const response = await fetch("/api/admin/download-stats", {
+    const query = new URLSearchParams({ product: downloadProduct.value, page: downloadPage });
+    const response = await fetch(`/api/admin/download-stats?${query}`, {
       cache: "no-store",
       credentials: "same-origin",
     });
-    if (handleAuthExpired(response)) return;
+    if (requestId !== downloadRequestId || handleAuthExpired(response)) return;
     const result = await readJsonResponse(response, "下载统计读取失败");
+    if (requestId !== downloadRequestId) return;
     if (!response.ok || !result.ok) {
       setStatus(downloadDashboardStatus, result.error || "下载统计读取失败", "error");
       return;
@@ -413,6 +455,7 @@ async function loadDownloadStats() {
     renderDownloadStats(result);
     setStatus(downloadDashboardStatus, "");
   } catch (error) {
+    if (requestId !== downloadRequestId) return;
     setStatus(downloadDashboardStatus, "网络异常，请稍后重试", "error");
   }
 }
@@ -601,6 +644,18 @@ bulkDeleteButton.addEventListener("click", () => {
 
 refreshButton.addEventListener("click", loadRequests);
 downloadRefreshButton.addEventListener("click", loadDownloadStats);
+downloadProduct.addEventListener("change", () => {
+  downloadPage = 1;
+  loadDownloadStats();
+});
+downloadPrev.addEventListener("click", () => {
+  downloadPage -= 1;
+  loadDownloadStats();
+});
+downloadNext.addEventListener("click", () => {
+  downloadPage += 1;
+  loadDownloadStats();
+});
 
 logoutButton.addEventListener("click", async () => {
   logoutButton.disabled = true;

@@ -7,7 +7,7 @@
     <meta name="description" content="Your super personal assistant. Explore ideas and move things forward with Katcat.AI." />
     <meta name="theme-color" content="#fffaf3" />
     <link rel="icon" href="./assets/katcat-mascot-mark.png" />
-    <link rel="stylesheet" href="./katcat-paper.css?v=20261022-8" />
+    <link rel="stylesheet" href="./katcat-paper.css?v=20261023-guide-en" />
     <link rel="stylesheet" href="./katcat-paper-companion.css?v=20261022-6" />
   </head>
   <body>
@@ -30,12 +30,18 @@
             <h1 id="product-title">Katcat<span>.AI</span></h1>
             <p class="tagline" data-i18n="tagline">Your Super Personal Assistant</p>
             <p class="description" data-i18n="description">Whether it starts as a wild idea or something you want to make real, bring it to me and we will explore it and move it forward together.</p>
-            <a class="download-link" href="https://www.sudotech.ai/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b" download>
+            <div class="download-actions">
+            <a class="download-link" href="/api/download/katcat/latest">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z" /></svg>
               <span data-i18n="downloadReady">Download for Windows</span>
               <span class="download-arrow" aria-hidden="true">↓</span>
             </a>
-            <p class="release-meta"><span class="status-dot" aria-hidden="true"></span><span data-i18n="downloadVersion">Version 1.0.0</span><span class="meta-divider" aria-hidden="true">/</span><span>Windows 10 / 11 · x64</span></p>
+            <div class="download-secondary">
+              <button class="video-link" type="button" id="watch-video" aria-haspopup="dialog" aria-controls="video-dialog"><img src="./assets/lucide-circle-play.svg" width="28" height="28" alt="" /><span data-i18n="watchVideo">Watch video</span></button>
+              <a class="guide-link" href="./katcat-guide-en.html"><span data-i18n="userGuide">Guide</span><span aria-hidden="true">↗</span></a>
+            </div>
+            </div>
+            <p class="release-meta"><span class="status-dot" aria-hidden="true"></span><span data-i18n="downloadVersion">Version 1.0.2</span><span class="meta-divider" aria-hidden="true">/</span><span>Windows 10 / 11 · x64</span></p>
           </div>
         </div>
         <a class="scroll-link" href="#workspace" aria-label="View Katcat workspace"><span>Katcat Workspace</span><span aria-hidden="true">↓</span></a>
@@ -50,15 +56,23 @@
               <button type="button" data-theme-option="dark"><span class="swatch dark" aria-hidden="true"></span><span data-i18n="darkMode">Dark</span></button>
             </div>
           </div>
-          <img id="katcat-preview" class="app-preview" src="./assets/katcat-app-light-en.png?v=20261022-2" alt="Katcat.AI Windows desktop in light mode" width="1920" height="1232" loading="lazy" />
+          <img id="katcat-preview" class="app-preview" src="./assets/katcat-app-light-en-v1.0.2.png" alt="Katcat.AI Windows desktop in light mode" width="1920" height="1232" loading="lazy" />
         </div>
       </section>
     </main>
     <footer class="paper-footer"><a href="#product-title" class="footer-wordmark">Katcat<span>.AI</span></a><nav aria-label="Legal information" data-i18n-aria="legalAria"><a href="./katcat-paper-privacy.html" data-i18n="privacy">Privacy Policy</a><a href="./katcat-paper-terms.html" data-i18n="terms">Terms of Service</a></nav></footer>
+    <dialog class="video-dialog" id="video-dialog" aria-labelledby="video-title">
+      <div class="video-dialog-header">
+        <h2 id="video-title">Katcat.AI</h2>
+        <button class="video-close" type="button" aria-label="Close video" data-i18n-aria="closeVideo" title="Close video"><img src="./assets/lucide-x.svg" width="22" height="22" alt="" /></button>
+      </div>
+      <video id="intro-video" controls playsinline preload="none" data-src="./assets/katcat-intro-v3.1.mp4?v=7501580b3234" aria-label="Katcat.AI video" data-i18n-aria="videoAria"></video>
+      <p class="video-error" role="alert" data-i18n="videoError" hidden>The video could not load. Please try again.</p>
+    </dialog>
     <button type="button" class="paper-companion" id="paper-companion" aria-label="Drag Katcat" title="Drag to move; arrow keys also move Katcat" hidden>
       <svg viewBox="12 26 354 354" aria-hidden="true" focusable="false"><image href="./assets/katcat-companion-motions.png" width="1448" height="1086" /></svg>
     </button>
-    <script src="./katcat.js?v=20261022-4"></script>
+    <script src="./katcat.js?v=20261023-release-102"></script>
     <script src="./katcat-paper-companion.js?v=20261022-8"></script>
   </body>
 </html>

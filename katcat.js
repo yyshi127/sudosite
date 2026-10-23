@@ -1,12 +1,12 @@
-const KATCAT_VERSION = "1.0.0";
+const KATCAT_VERSION = "1.0.2";
 const previewSources = {
   zh: {
-    light: "./assets/katcat-app-light.png",
-    dark: "./assets/katcat-app-dark.png",
+    light: "./assets/katcat-app-light-zh-v1.0.2.png",
+    dark: "./assets/katcat-app-dark-zh-v1.0.2.png",
   },
   en: {
-    light: "./assets/katcat-app-light-en.png?v=20261022-2",
-    dark: "./assets/katcat-app-dark-en.png",
+    light: "./assets/katcat-app-light-en-v1.0.2.png",
+    dark: "./assets/katcat-app-dark-en-v1.0.2.png",
   },
 };
 
@@ -20,6 +20,11 @@ const translations = {
     tagline: "您的超级个人助理",
     description: "无论是一个天马行空的想法，还是一件想做成的事，都可以交给我一起探索、推进。",
     downloadReady: "下载 Windows 版",
+    userGuide: "使用说明",
+    watchVideo: "观看视频",
+    closeVideo: "关闭视频",
+    videoAria: "Katcat.AI 产品视频",
+    videoError: "视频暂时无法加载，请稍后重试。",
     downloadVersion: `版本 ${KATCAT_VERSION}`,
     releaseReady: "官方下载已开放",
     requirementsAria: "系统要求",
@@ -45,6 +50,11 @@ const translations = {
     tagline: "Your Super Personal Assistant",
     description: "Whether it starts as a wild idea or something you want to make real, bring it to me and we will explore it and move it forward together.",
     downloadReady: "Download for Windows",
+    userGuide: "Guide",
+    watchVideo: "Watch video",
+    closeVideo: "Close video",
+    videoAria: "Katcat.AI product video",
+    videoError: "The video could not load. Please try again.",
     downloadVersion: `Version ${KATCAT_VERSION}`,
     releaseReady: "Official download available",
     requirementsAria: "System requirements",
@@ -100,6 +110,10 @@ function applyLanguage(language) {
   });
 
   updatePreview();
+  const guideLink = document.querySelector(".guide-link");
+  if (guideLink) guideLink.href = currentLanguage === "en" ? "./katcat-guide-en.html" : "./katcat-guide.html";
+  const closeVideo = document.querySelector(".video-close");
+  if (closeVideo) closeVideo.title = dictionary.closeVideo;
 }
 
 function updatePreview() {
@@ -131,3 +145,40 @@ themeOptions.forEach(option => {
 
 applyLanguage(currentLanguage);
 applyTheme(currentTheme);
+
+window.addEventListener("pageshow", () => {
+  const language = localStorage.getItem("katcatLanguagePreference");
+  if (language === "en" || language === "zh") applyLanguage(language);
+});
+
+const videoDialog = document.querySelector("#video-dialog");
+const introVideo = document.querySelector("#intro-video");
+const watchVideo = document.querySelector("#watch-video");
+if (videoDialog && introVideo && watchVideo) {
+  const videoError = videoDialog.querySelector(".video-error");
+  watchVideo.addEventListener("click", () => {
+    videoError.hidden = true;
+    videoDialog.showModal();
+    document.body.classList.add("video-open");
+    introVideo.src = introVideo.dataset.src;
+    // Only a user gesture starts loading and playback; native controls remain available.
+    introVideo.play().catch(error => {
+      if (videoDialog.open && error.name !== "AbortError" && error.name !== "NotAllowedError") videoError.hidden = false;
+    });
+  });
+  videoDialog.querySelector(".video-close").addEventListener("click", () => videoDialog.close());
+  videoDialog.addEventListener("click", event => {
+    if (event.target !== videoDialog) return;
+    const bounds = videoDialog.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) videoDialog.close();
+  });
+  introVideo.addEventListener("error", () => {
+    if (videoDialog.open) videoError.hidden = false;
+  });
+  videoDialog.addEventListener("close", () => {
+    introVideo.pause();
+    introVideo.removeAttribute("src");
+    introVideo.load();
+    document.body.classList.remove("video-open");
+  });
+}

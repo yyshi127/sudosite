@@ -1478,6 +1478,48 @@ body[data-lang="en"] .qr-card span {
   line-height: 1.6;
 }
 
+.download-admin-filter,
+.download-admin-pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.download-admin-filter select {
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+#download-admin-details {
+  margin-top: 32px;
+}
+
+#download-admin-details h2 {
+  font-size: 20px;
+  text-align: left;
+}
+
+.download-admin-pagination button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#download-admin-details .download-admin-note {
+  margin-bottom: 14px;
+}
+
+#download-admin-events td:last-child {
+  max-width: 360px;
+  overflow-wrap: anywhere;
+}
+
 .admin-table {
   width: 100%;
   min-width: 1080px;

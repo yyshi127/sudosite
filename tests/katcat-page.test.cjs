@@ -28,6 +28,37 @@ async function waitForServer() {
   throw new Error(`Server did not start:\n${serverOutput}`);
 }
 
+async function checkVideo(page, name) {
+  const video = page.locator('#intro-video');
+  assert.equal(await video.getAttribute('src'), null, 'Video must not load before a click');
+  await page.locator('#watch-video').click();
+  await page.waitForFunction(() => document.querySelector('#intro-video').currentTime > 0.1);
+  assert.equal(await video.evaluate(element => element.videoWidth), 1920);
+  assert.equal(await video.evaluate(element => element.videoHeight), 1080);
+  assert.equal(await video.evaluate(element => element.controls), true);
+  const fits = await page.locator('#video-dialog').evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight;
+  });
+  assert.ok(fits, 'Video dialog must fit the viewport');
+  fs.mkdirSync(path.join(root, 'test-results'), { recursive: true });
+  await page.screenshot({ path: path.join(root, 'test-results', `katcat-video-${name}.png`) });
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#video-dialog').isVisible(), false);
+  await page.waitForFunction(() => document.querySelector('#intro-video').getAttribute('src') === null);
+  assert.equal(await video.evaluate(element => element.paused), true);
+  assert.equal(await video.getAttribute('src'), null);
+  assert.equal(await page.locator('#watch-video').evaluate(element => element === document.activeElement), true);
+  await page.locator('#watch-video').click();
+  await page.locator('.video-close').click();
+  assert.equal(await page.locator('#video-dialog').isVisible(), false);
+  await page.route('**/katcat-intro-v3.1.mp4*', route => route.abort());
+  await page.locator('#watch-video').click();
+  await page.locator('.video-error').waitFor({ state: 'visible' });
+  await page.keyboard.press('Escape');
+  await page.unroute('**/katcat-intro-v3.1.mp4*');
+}
+
 (async () => {
   let browser;
   try {
@@ -41,21 +72,25 @@ async function waitForServer() {
     await desktop.goto(`http://www.sudotech.ai:${port}/katcat.html`, { waitUntil: "networkidle" });
     assert.equal(await desktop.locator("html").getAttribute("lang"), "en");
     assert.equal(await desktop.locator(".tagline").textContent(), "Your Super Personal Assistant");
-    assert.equal(await desktop.locator(".download-link").getAttribute("href"), "https://www.sudotech.ai/downloads/Katcat.AI-V1.0.0-Windows-x64-20261022.exe?v=590d6784581b");
+    assert.equal(await desktop.locator(".download-link").getAttribute("href"), "/api/download/katcat/latest");
     assert.equal(await desktop.locator('[data-i18n="downloadReady"]').innerText(), "Download for Windows");
-    assert.equal(await desktop.locator("[data-i18n=\"downloadVersion\"]").textContent(), "Version 1.0.0");
-    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-light-en\.png\?/);
+    assert.equal(await desktop.locator("[data-i18n=\"downloadVersion\"]").textContent(), "Version 1.0.2");
+    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-light-en-v1\.0\.2\.png$/);
     assert.equal(await desktop.locator(".theme-switcher").isVisible(), true);
+    await checkVideo(desktop, 'desktop');
     await desktop.locator("#katcat-preview").evaluate(image => image.decode());
 
     await desktop.locator('[data-theme-option="dark"]').click();
-    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-dark-en\.png$/);
+    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-dark-en-v1\.0\.2\.png$/);
     await desktop.locator("#katcat-preview").evaluate(image => image.decode());
     assert.equal(await desktop.locator('[data-theme-option="dark"]').getAttribute("aria-pressed"), "true");
 
     await desktop.locator('[data-lang-option="zh"]').click();
-    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-dark\.png$/);
+    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-dark-zh-v1\.0\.2\.png$/);
     assert.equal(await desktop.locator(".tagline").textContent(), "您的超级个人助理");
+    await desktop.locator('[data-theme-option="light"]').click();
+    assert.match(await desktop.locator("#katcat-preview").getAttribute("src"), /katcat-app-light-zh-v1\.0\.2\.png$/);
+    await desktop.locator("#katcat-preview").evaluate(image => image.decode());
     assert.equal(
       await desktop.locator(".description").textContent().then(value => value.trim()),
       "无论是一个天马行空的想法，还是一件想做成的事，都可以交给我一起探索、推进。"
@@ -94,7 +129,60 @@ async function waitForServer() {
     await mobile.goto(`http://127.0.0.1:${port}/katcat.html`, { waitUntil: "networkidle" });
     assert.equal(await mobile.locator("html").getAttribute("lang"), "en");
     assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
+    await checkVideo(mobile, 'mobile');
     await mobile.screenshot({ path: path.join(root, "test-results", "katcat-mobile.png"), fullPage: true });
+
+    assert.equal(await mobile.locator('.guide-link span[data-i18n]').innerText(), 'Guide');
+    await mobile.locator('.guide-link').click();
+    await mobile.waitForURL('**/katcat-guide-en.html');
+    assert.equal(await mobile.locator('html').getAttribute('lang'), 'en');
+    assert.equal(await mobile.locator('h1').innerText(), 'Katcat.AI: Your Super Personal Assistant');
+    assert.equal(await mobile.locator('.copybar, .extras, textarea').count(), 0);
+    assert.equal(await mobile.locator('[data-guide-language="en"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await mobile.locator('.guide-main img').count(), 5);
+    assert.equal(await mobile.locator('#article h2').count(), 6);
+    for (const image of await mobile.locator('.guide-main img').all()) {
+      await image.scrollIntoViewIfNeeded();
+      await image.evaluate(img => img.decode());
+      assert.ok(await image.evaluate(img => img.naturalWidth > 0));
+    }
+    for (const width of [320, 390, 1440]) {
+      await mobile.setViewportSize({ width, height: 900 });
+      await mobile.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, 0); });
+      assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      for (const figure of await mobile.locator('#article figure').all()) {
+        const aligned = await figure.evaluate(element => {
+          const image = element.querySelector('img').getBoundingClientRect();
+          const text = element.closest('section').querySelector('p').getBoundingClientRect();
+          return Math.abs(image.left - text.left) < 1 && Math.abs(image.width - text.width) < 1;
+        });
+        assert.ok(aligned, `guide screenshots must align with the text at ${width}px`);
+      }
+      await mobile.screenshot({ path: path.join(root, 'test-results', `katcat-guide-${width}.png`), fullPage: true });
+    }
+    await mobile.locator('.guide-back').click();
+    await mobile.waitForURL('**/katcat.html');
+    await mobile.locator('[data-lang-option="zh"]').click();
+    assert.equal(await mobile.locator('.guide-link span[data-i18n]').innerText(), '使用说明');
+    await mobile.locator('.guide-link').click();
+    await mobile.waitForURL('**/katcat-guide.html');
+    assert.equal(await mobile.locator('h1').innerText(), 'Katcat.AI：您的超级个人助理');
+    await mobile.locator('[data-guide-language="en"]').click();
+    await mobile.waitForURL('**/katcat-guide-en.html');
+    await mobile.reload();
+    assert.equal(await mobile.locator('html').getAttribute('lang'), 'en');
+    await mobile.locator('.guide-back').click();
+    await mobile.waitForURL('**/katcat.html');
+    assert.equal(await mobile.locator('html').getAttribute('lang'), 'en');
+    await mobile.locator('.guide-link').click();
+    await mobile.waitForURL('**/katcat-guide-en.html');
+    await mobile.locator('[data-guide-language="zh"]').click();
+    await mobile.waitForURL('**/katcat-guide.html');
+    await mobile.reload();
+    assert.equal(await mobile.locator('html').getAttribute('lang'), 'zh-CN');
+    await mobile.locator('.guide-back').click();
+    await mobile.waitForURL('**/katcat.html');
+    assert.equal(await mobile.locator('html').getAttribute('lang'), 'zh-CN');
 
     console.log("katcat page: PASS");
   } finally {

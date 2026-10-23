@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUDO 数豆｜预约演示后台</title>
     <link rel="stylesheet" href="./feedback.css?v=20260922-3" />
-    <link rel="stylesheet" href="./styles.css?v=20261005-1" />
-    <script src="./admin.js?v=20261005-1" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20261022-downloads" />
+    <script src="./admin.js?v=20261022-downloads" defer></script>
     <script src="./feedback-admin.js?v=20260922-3" defer></script>
   </head>
   <body class="admin-page">
@@ -174,6 +174,13 @@
           </div>
           <button class="button secondary" id="download-admin-refresh" type="button">刷新</button>
         </div>
+        <label class="download-admin-filter">产品
+          <select id="download-admin-product">
+            <option value="all">全部产品</option>
+            <option value="xiaojing-accounting">小兢会计桌面版</option>
+            <option value="katcat">Katcat.AI</option>
+          </select>
+        </label>
         <dl class="download-admin-summary" aria-label="下载概览">
           <div>
             <dt>累计下载</dt>
@@ -204,7 +211,22 @@
             <tbody id="download-admin-versions"></tbody>
           </table>
         </div>
-        <p class="download-admin-note">统计下载发起次数；同一访客 10 分钟内重复点击只记录一次。</p>
+        <p class="download-admin-note">统计官网下载入口发起的次数，Katcat.AI 安装包直链的有效响应也会补记；同一浏览器、同一产品版本 10 分钟内只记录一次，HEAD 检查与后续续传分段不计入。次数不代表完整下载或安装完成。</p>
+        <section id="download-admin-details" aria-labelledby="download-admin-details-title">
+          <h2 id="download-admin-details-title">Katcat.AI 下载明细</h2>
+          <p class="download-admin-note">仅记录功能启用后的下载，保留最近 90 天明细；累计次数不受影响。IP 为请求来源公网地址，不代表独立用户或精确位置。</p>
+          <div class="download-admin-table-wrap">
+            <table class="download-admin-table">
+              <thead><tr><th>下载时间</th><th>版本</th><th>来源 IP</th><th>安装包地址</th></tr></thead>
+              <tbody id="download-admin-events"></tbody>
+            </table>
+          </div>
+          <nav class="download-admin-pagination" aria-label="下载明细分页">
+            <button class="admin-icon-button" id="download-admin-prev" type="button" title="上一页" aria-label="上一页" disabled>←</button>
+            <span id="download-admin-page" role="status"></span>
+            <button class="admin-icon-button" id="download-admin-next" type="button" title="下一页" aria-label="下一页" disabled>→</button>
+          </nav>
+        </section>
       </section>
 
       <div class="admin-settings-modal" id="admin-settings" aria-hidden="true">
