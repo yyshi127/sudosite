@@ -38,9 +38,9 @@ h1 .team-badge { display: inline-block; margin-top: 3px; padding: 4px 7px; borde
 .download-button svg { width: 21px; height: 21px; fill: currentColor; }
 .secondary-link { font-size: 14px; font-weight: 650; color: #147a6d; }
 .secondary-link span { padding-left: 7px; }
-.availability { display: flex; align-items: center; gap: 8px; color: #708485; font-size: 13px; margin: 15px 0 0; }
+.availability { display: flex; align-items: center; gap: 8px; color: #111; font-size: 13px; margin: 15px 0 0; }
 .availability > span[aria-hidden="true"] { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #b1c4bd; }
-.system { color: #8a999c; font-size: 13px; margin: 25px 0 0; }
+.system { color: #111; font-size: 13px; margin: 25px 0 0; }
 .system span { padding: 0 6px; }
 .workspace { min-width: 0; width: calc(100% + max(24px, (100vw - 1440px) / 2 - 32px)); }
 .workspace-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 23px; }
