@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="小兢会计 Team 使用指南：连接模型、创建 Bot、设置职责、组建群聊，让财务团队协作起来。" />
+    <title>小兢会计 Team · 使用指南</title>
+    <link rel="icon" href="./assets/xiaojing-team-icon.png" />
+    <link rel="stylesheet" href="./xiaojing-team-guide.css?v=20261028-1" />
+    <script src="./xiaojing-team-guide.js?v=20261028-1" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#overview" data-guide-copy="skip">跳转到使用指南</a>
+    <header class="guide-header">
+      <div class="header-inner">
+        <a class="guide-brand" href="./xiaojing-team.html" aria-label="小兢会计 Team"><img src="./assets/xiaojing-team-guide-logo.png" width="640" height="134" alt="SUDO 数豆科技" /></a>
+        <span class="header-label" data-guide-copy="guideLabel">使用指南</span>
+        <div class="header-actions">
+
+          <a class="back-link" href="./xiaojing-team.html"><span data-guide-copy="back">返回产品页</span><img src="./assets/lucide-arrow-up-right.svg" width="18" height="18" alt="" /></a>
+        </div>
+      </div>
+    </header>
+    <section class="guide-cover" aria-labelledby="guide-title">
+      <img class="cover-art" src="./assets/xiaojing-team-guide-mountains.webp" alt="" width="1536" height="380" fetchpriority="high" />
+      <div class="cover-inner">
+        <div class="cover-copy">
+          <p class="eyebrow" data-guide-copy="introKicker">小兢会计 TEAM · 使用指南</p>
+          <h1 id="guide-title">小兢会计 <b class="team-badge">Team</b><span data-guide-copy="titleGuide">使用指南</span></h1>
+          <p class="intro-title" data-guide-copy="introTitle">从第一个 Bot，到一支协作的财务团队。</p>
+          <a class="start-guide" href="#overview"><span data-guide-copy="startGuide">开始阅读</span><img src="./assets/lucide-arrow-down.svg" alt="" width="20" height="20" /></a>
+        </div>
+      </div>
+    </section>
+    <div class="guide-layout">
+      <aside class="guide-sidebar">
+        <p class="sidebar-label" data-guide-copy="contents">本页目录</p>
+        <nav aria-label="指南目录" id="chapter-nav">
+          <a href="#overview" aria-current="location"><span>00</span><span data-guide-copy="navOverview">认识你的团队</span></a>
+          <a href="#setup"><span>01</span><span data-guide-copy="navSetup">连接模型</span></a>
+          <a href="#bots"><span>02</span><span data-guide-copy="navBots">创建 Bot</span></a>
+          <a href="#roles"><span>03</span><span data-guide-copy="navRoles">设置职责</span></a>
+          <a href="#groups"><span>04</span><span data-guide-copy="navGroups">组建群聊</span></a>
+          <a href="#collaboration"><span>05</span><span data-guide-copy="navWork">开始协作</span></a>
+          <a href="#control"><span>06</span><span data-guide-copy="navControl">掌握节奏</span></a>
+        </nav>
+        <div class="sidebar-foot"><span class="edition">XIAOJING TEAM / 1.0.2</span><p data-guide-copy="sidebarNote">分工清楚，协作有序。</p></div>
+      </aside>
+      <div class="mobile-chapters"><label for="chapter-select" data-guide-copy="chapters">章节</label><select id="chapter-select"><option value="overview" data-guide-copy="navOverview">认识你的团队</option><option value="setup" data-guide-copy="navSetup">连接模型</option><option value="bots" data-guide-copy="navBots">创建 Bot</option><option value="roles" data-guide-copy="navRoles">设置职责</option><option value="groups" data-guide-copy="navGroups">组建群聊</option><option value="collaboration" data-guide-copy="navWork">开始协作</option><option value="control" data-guide-copy="navControl">掌握节奏</option></select></div>
+      <main class="guide-content">
+        <section id="overview" class="guide-section overview" aria-labelledby="overview-title">
+          <p class="eyebrow" data-guide-copy="overviewKicker">00 / 认识你的团队</p>
+          <h2 id="overview-title" data-guide-copy="overviewTitle">一支团队，一起做财务。</h2>
+          <p class="intro-description" data-guide-copy="introDescription">让不同的 Bot 分别负责票据整理、账务处理和财务复核。可以单独交办，也可以建群协作，由你确认目标、跟进进度、验收结果。</p>
+          <figure class="guide-figure" id="home-figure">
+            <div class="figure-toolbar"><span class="figure-label" data-guide-copy="homeLabel">你的 AI 财务团队</span><div class="theme-switcher" role="group" aria-label="截图主题"><button type="button" data-guide-theme="light" aria-pressed="true"><span class="swatch light"></span><span data-guide-copy="light">浅色</span></button><button type="button" data-guide-theme="dark" aria-pressed="false"><span class="swatch dark"></span><span data-guide-copy="dark">深色</span></button></div><button type="button" class="icon-button" data-enlarge="home-image" aria-label="放大查看截图" title="放大查看截图"><img src="./assets/lucide-maximize-2.svg" width="18" height="18" alt="" /></button></div>
+            <img class="screenshot" id="home-image" src="./assets/xiaojing-team-home-light-20261028.png" width="1920" height="1232" alt="小兢会计 Team 初始主界面，浅色主题" fetchpriority="high" />
+            <figcaption data-guide-copy="homeCaption">左侧选择主 Bot、普通 Bot 或群聊；中间对话，右侧查看与调整设置。</figcaption>
+          </figure>
+          <div class="concepts"><div><span class="concept-index">01</span><h3 data-guide-copy="mainBot">主 Bot · 小兢会计</h3><p data-guide-copy="mainBotText">告诉它你需要哪些成员，它可以帮助创建 Bot、配置职责并组建群聊。</p></div><div><span class="concept-index sage">02</span><h3 data-guide-copy="members">普通 Bot</h3><p data-guide-copy="membersText">每个 Bot 有独立的职责和私聊。整理一张票据，也可以直接交给它。</p></div><div><span class="concept-index mint">03</span><h3 data-guide-copy="groups">群聊协作</h3><p data-guide-copy="groupsText">把普通 Bot 加入群聊，按分工处理同一项任务；可选一位群负责人统筹。</p></div></div>
+        </section>
+        <section class="guide-section" id="setup" aria-labelledby="setup-title">
+          <p class="eyebrow" data-guide-copy="setupKicker">01 / 连接模型</p><h2 id="setup-title" data-guide-copy="setupTitle">先连接模型，再开始工作。</h2>
+          <ol class="steps"><li><strong data-guide-copy="install">安装小兢会计团队版。</strong><p>打开收到的 Windows x64 安装包，完成安装后启动应用。</p></li><li><strong data-guide-copy="connect">配置模型。</strong><p data-guide-copy="connectText">按照首次启动引导，或打开「设置 → 模型」，添加模型服务商和 API Key，选择全局基础模型。</p></li><li><strong data-guide-copy="check">确认可以对话。</strong><p data-guide-copy="checkText">选择左侧主 Bot「小兢会计」，发送一条简短消息。收到回复后，就可以创建你的财务团队。</p></li></ol>
+          <aside class="guide-note"><strong data-guide-copy="keyTitle">模型服务与 API Key</strong><p data-guide-copy="keyText">API 使用费用由模型服务商收取。请妥善保管 API Key，反馈问题时不要将它包含在截图中。</p></aside>
+        </section>
+        <section class="guide-section bot-walkthrough" id="bots" aria-labelledby="bots-title">
+          <div class="walkthrough-intro">
+          <p class="eyebrow" data-guide-copy="botsKicker">02 / 创建 BOT</p><h2 id="bots-title" data-guide-copy="botsTitle">先请一位新同事加入。</h2><p class="section-lead" data-guide-copy="botsText">点击左侧「创建新 Bot」，填写名称，选择豆子头像和颜色，再点击「创建」。也可以直接告诉主 Bot 要创建哪些成员。</p>
+          </div>
+          <figure class="guide-figure"><div class="figure-toolbar"><span class="figure-label" data-guide-copy="createLabel">创建 Bot</span><button type="button" class="icon-button" data-enlarge="create-image" aria-label="放大查看截图" title="放大查看截图"><img src="./assets/lucide-maximize-2.svg" width="18" height="18" alt="" /></button></div><div class="create-focus"><img id="create-image" src="./assets/xiaojing-team-guide-create-bot.png" width="2520" height="1608" alt="小兢会计创建 Bot 弹窗：名称、豆子头像形态与颜色" loading="lazy" /></div><figcaption data-guide-copy="createCaption">创建后自动打开新 Bot 的聊天首页。默认排在「未分组」最上方，列表自动滚动，让它清晰可见。</figcaption></figure>
+          <div class="prompt-example"><p data-guide-copy="promptIntro">一次创建团队并建群，可以这样对主 Bot 说：</p><blockquote class="example-prompt" data-guide-copy="examplePrompt">帮我创建票据整理、账务处理、财务复核三个 Bot，分别设置清楚职责，再组成「财务团队」群聊，由财务复核负责统筹。</blockquote></div>
+        </section>
+        <section class="guide-section" id="roles" aria-labelledby="roles-title">
+          <p class="eyebrow" data-guide-copy="rolesKicker">03 / 设置职责</p><h2 id="roles-title" data-guide-copy="rolesTitle">把每位成员的工作交代清楚。</h2><p class="section-lead" data-guide-copy="rolesText">选择一个普通 Bot，打开右侧「Bot 设置」。填写职责说明，按需选择模型并保存；也可以在私聊中安排具体任务。</p>
+          <dl class="settings-list"><div><dt data-guide-copy="instructions">职责说明</dt><dd data-guide-copy="instructionsText">写清负责的环节、使用的资料、交付的内容和检查标准。例如：整理票据信息，输出明细表，并单列缺失或存疑项目。</dd></div><div><dt data-guide-copy="model">模型</dt><dd data-guide-copy="modelText">跟随全局基础模型，或为这个 Bot 单独指定模型。</dd></div><div><dt data-guide-copy="permissions">工作文件夹与权限</dt><dd data-guide-copy="permissionsText">查看 Bot 的固定工作文件夹，按任务设置操作权限。私聊与各群聊的成员权限分别设置。</dd></div><div><dt data-guide-copy="memory">记忆</dt><dd data-guide-copy="memoryText">为 Bot 或群聊保存常用背景；需要团队共用的内容，可明确分享至团队记忆。</dd></div></dl>
+        <figure class="guide-figure settings-figure"><div class="figure-toolbar"><span class="figure-label">Bot 设置 · 界面局部</span><button type="button" class="icon-button" data-enlarge="bot-settings-image" aria-label="放大查看截图" title="放大查看截图"><img src="./assets/lucide-maximize-2.svg" width="18" height="18" alt="" /></button></div><img class="screenshot" id="bot-settings-image" src="./assets/xiaojing-team-guide-bot-settings.png" alt="小兢会计 Bot 设置：头像、所属分组、模型与操作权限" loading="lazy" /><figcaption>为每位成员选择头像、所属分组、模型与操作权限。</figcaption></figure></section>
+        <section class="guide-section" id="groups" aria-labelledby="groups-title">
+          <p class="eyebrow" data-guide-copy="groupsKicker">04 / 组建群聊</p><h2 id="groups-title" data-guide-copy="groupsTitle">把分工串成一条工作流程。</h2><p class="section-lead" data-guide-copy="groupText">点击左侧「群聊」旁的 +，输入群名、勾选普通 Bot，可指定一名「群负责人」统筹，再创建群聊。群内职责留空时沿用 Bot 自身职责，也可单独填写。</p>
+          <figure class="guide-figure"><div class="figure-toolbar"><span class="figure-label" data-guide-copy="groupLabel">群设置 · 协作规则与权限</span><button type="button" class="icon-button" data-enlarge="group-image" aria-label="放大查看截图" title="放大查看截图"><img src="./assets/lucide-maximize-2.svg" width="18" height="18" alt="" /></button></div><img class="screenshot" id="group-image" src="./assets/xiaojing-team-guide-group-settings.png" width="2520" height="1608" alt="小兢会计群聊设置局部：协作规则与成员权限" loading="lazy" /><figcaption data-guide-copy="groupCaption">群设置局部：调整每轮协作次数、交接记录显示与成员权限，仅影响当前群聊。</figcaption></figure>
+          <aside class="guide-note"><strong data-guide-copy="groupNoteTitle">分组整理列表，群聊开展协作。</strong><p data-guide-copy="groupNote">分组名后的括号表示 Bot 与群聊的总数，每个群聊计为 1 个；群名后的数字是群成员数。主 Bot 用于创建和配置，不作为普通群成员。建群后，发送目标才会开始工作。</p></aside>
+        <figure class="guide-figure"><div class="figure-toolbar"><span class="figure-label" data-guide-copy="chatLabel">一句话，创建团队并建群</span><button type="button" class="icon-button" data-enlarge="chat-image" aria-label="放大查看截图" title="放大查看截图"><img src="./assets/lucide-maximize-2.svg" width="18" height="18" alt="" /></button></div><img class="screenshot" id="chat-image" src="./assets/xiaojing-team-guide-create-team.png" width="2520" height="1608" alt="主 Bot 已创建八岗位财务团队、群聊并指定负责人" loading="lazy" /><figcaption data-guide-copy="chatCaption">主 Bot 创建团队后的实际结果：岗位、职责、成员和负责人一并确认。</figcaption></figure></section>
+        <section class="guide-section" id="collaboration" aria-labelledby="work-title">
+          <p class="eyebrow" data-guide-copy="workKicker">05 / 开始协作</p><h2 id="work-title" data-guide-copy="workTitle">给团队一个清楚的任务。</h2><p class="section-lead" data-guide-copy="workText">在群聊中说明目标、提供材料，并约定交付格式。成员使用群工作文件夹共享资料，群负责人按分工协调推进。</p>
+          <blockquote class="example-prompt" data-guide-copy="taskPrompt">根据我提供的本月票据，票据整理 Bot 先输出明细并列出缺失资料；账务处理 Bot 根据确认后的资料给出分录建议；财务复核 Bot 检查金额、依据和待确认事项，最后汇总交付给我验收。</blockquote>
+
+          <p data-guide-copy="reviewText">通过成员名称和交接记录查看进展。打开交付文件，核对明细、依据与待确认事项，再决定是否补充资料或进入下一步。成员任务显示「已完成」后，仍需由你验收成果。</p>
+        </section>
+        <section class="guide-section" id="control" aria-labelledby="control-title">
+          <p class="eyebrow" data-guide-copy="controlKicker">06 / 掌握节奏</p><h2 id="control-title" data-guide-copy="controlTitle">需要继续、调整，还是停一下？</h2>
+          <dl class="settings-list"><div><dt data-guide-copy="followup">补充消息</dt><dd data-guide-copy="followupText">普通消息加入队列，当前任务继续执行；暂停期间发送的消息会等待恢复后处理。</dd></div><div><dt data-guide-copy="pause">暂停 / 继续</dt><dd data-guide-copy="pauseText">「暂停」停止后续接话，当前成员先完成任务。显示「已暂停接话」时，查看下方原因，再点击「继续」；达到本轮协作次数上限也会暂停。</dd></div><div><dt data-guide-copy="interrupt">打断并调整</dt><dd data-guide-copy="interruptText">输入新的安排，选择「打断并调整」，中断当前任务并按新指令开始新一轮。</dd></div><div><dt data-guide-copy="stop">停止</dt><dd data-guide-copy="stopText">结束本轮协作，已保存的结果保留，已完成的操作不会撤销。之后发送新指令可开始新一轮。</dd></div></dl>
+          <div class="guide-faq"><details><summary data-guide-copy="faqModel">Bot 没有回复，应该检查什么？</summary><p data-guide-copy="faqModelText">先查看是否等待审批、确认或已暂停，再检查「设置 → 模型」中的服务商、API Key 和所选模型，以及网络连接与服务商余额。</p></details><details><summary data-guide-copy="faqRecords">可以只看对话，不看交接记录吗？</summary><p data-guide-copy="faqRecordsText">可以。在群设置中关闭「显示交接记录与状态」。协作照常进行，交接记录与已交付的文件卡片仍会保留。</p></details><details><summary data-guide-copy="faqHelp">如何反馈问题？</summary><p><span data-guide-copy="faqHelpText">请提供应用版本、复现步骤和去除隐私信息的截图。</span><a href="./feedback.html" target="_blank" rel="noopener noreferrer" data-guide-copy="issueLink">反馈问题</a></p></details></div>
+        </section>
+        <footer class="guide-footer"><div><span class="eyebrow" data-guide-copy="finishKicker">现在，开始你的第一项任务</span><h2 data-guide-copy="finishTitle">分工交给团队，关键判断由你把关。</h2></div><a href="./xiaojing-team.html" class="footer-link"><span data-guide-copy="back">返回产品页</span><img src="./assets/lucide-arrow-up-right.svg" width="20" height="20" alt="" /></a></footer>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="site-footer-inner"><a class="footer-brand" href="./xiaojing-team.html">小兢会计 <b class="team-badge">Team</b></a><nav aria-label="相关网站"><a href="./xiaojing-team.html" data-guide-copy="teamFooter">小兢会计 Team</a><a href="./" data-guide-copy="company">数豆科技</a></nav><span class="footer-note" data-guide-copy="footerNote">用 AI 重新定义财务。</span></div></footer>
+    <dialog id="guide-image-dialog" aria-label="截图查看器"><div class="viewer-header"><span id="viewer-title"></span><div class="viewer-actions"><div class="zoom-toggle"><button type="button" id="zoom-fit" aria-pressed="true" data-guide-copy="fit">适应窗口</button><button type="button" id="zoom-actual" aria-pressed="false">100%</button></div><button type="button" class="icon-button" id="viewer-close" aria-label="关闭截图" title="关闭截图"><img src="./assets/lucide-x.svg" width="20" height="20" alt="" /></button></div></div><div class="viewer-body" id="viewer-body" tabindex="0"><img id="viewer-image" alt="" /></div></dialog>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7fbfa" />
+  <meta name="description" content="小兢会计 Team：创建适合不同任务的智能体，组建自己的 Bot 团队。" />
+  <title>小兢会计 Team | 您的 AI 智能体团队</title>
+  <link rel="icon" href="./assets/xiaojing-team-icon.png" />
+  <link rel="stylesheet" href="./xiaojing-team.css" />
+  <script src="./xiaojing-team.js" defer></script>
+</head>
+<body>
+  <header class="site-header wrap" id="top">
+    <a class="brand" href="./" aria-label="数豆科技首页"><img src="./assets/sudo-logo-gray.png" alt="SUDO 数豆科技" /><span class="brand-divider" aria-hidden="true"></span><span class="brand-product">小兢会计 <b>Team</b></span></a>
+    <nav class="header-nav" aria-label="产品导航">
+      <a class="desktop-link" href="./download.html"><span data-text="desktop">了解桌面版</span> <span aria-hidden="true">↗</span></a>
+      <div class="language-switch" role="group" aria-label="切换语言"><button type="button" data-lang="zh" aria-pressed="true">中文</button><span aria-hidden="true">/</span><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+      <a class="home-link" href="./"><span data-text="home">返回官网</span> <span aria-hidden="true">→</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero wrap" aria-labelledby="product-title">
+      <div class="intro">
+        <div class="product-signature"><img src="./assets/xiaojing-team-icon.png" width="72" height="72" alt="" /><span><strong>Agent Bot</strong> <span class="signature-team">Team</span></span></div>
+        <h1 id="product-title"><span class="product-name" data-text="product">小兢会计</span><span class="team-badge">Team</span></h1>
+        <p class="headline"><span data-text="headlineFirst">从一句话开始，</span><span data-text="headlineSecond">组建你的 AI 财务团队</span><span class="headline-dot" data-text="headlineEnd">。</span></p>
+        <p class="description" data-text="description">从财务到日常工作，创建适合不同任务的 Bot，为它们分配角色与职责。在群聊中说出目标，让你的 AI 团队各展所长，一起把事情向前推进。</p>
+        <div class="actions">
+          <button class="download-button" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.2 10.5 3v8.15H2V4.2Zm9.5-1.34L22 1.35v9.8H11.5V2.86ZM2 12.15h8.5V20.3L2 19.1v-6.95Zm9.5 0H22v9.8l-10.5-1.51v-8.29Z" /></svg>
+            <span data-text="download">Windows 版准备中</span>
+          </button>
+          <a class="secondary-link" href="./xiaojing-team-guide.html" hreflang="zh-CN"><span data-text="guide">使用指南</span> <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="availability"><span aria-hidden="true"></span><span data-text="availability">安装包即将上线</span></p>
+        <p class="system"><span data-text="system">Windows 桌面客户端</span> <span aria-hidden="true">·</span> <span data-text="language">简体中文</span></p>
+      </div>
+
+      <div class="workspace" aria-label="产品界面">
+        <div class="workspace-toolbar">
+          <div class="view-switch" role="group" aria-label="切换界面截图">
+            <button type="button" data-view="light" aria-pressed="true"><span class="swatch light"></span><span data-text="light">浅色</span></button>
+            <button type="button" data-view="dark" aria-pressed="false"><span class="swatch dark"></span><span data-text="dark">深色</span></button>
+          </div>
+        </div>
+        <button class="screen-button" data-theme="light" type="button" aria-label="放大查看产品界面"><img id="workspace-image" src="./assets/xiaojing-team-home-light-20261028.png" width="2520" height="1608" alt="小兢会计 Team 浅色主界面" fetchpriority="high" /></button>
+        <div class="workspace-caption"><span id="workspace-caption">小兢会计 Team · 浅色主界面</span><span class="workspace-index">01 / 02</span></div>
+      </div>
+    </section>
+
+    <section class="roles-section" aria-labelledby="roles-title">
+      <div class="wrap roles-inner">
+        <div class="roles-heading"><div><p class="overline">BUILT FOR WORKING TOGETHER</p><h2 id="roles-title"><span data-role-text="titleLead">同一个</span><span class="roles-keyword roles-goal" data-role-text="titleGoal">目标</span><span data-role-text="titleSeparator">，</span><span class="roles-second-clause"><span data-role-text="titleBridge">同一个</span><span class="roles-keyword roles-team" data-role-text="titleTeam">团队</span><span data-role-text="titleEnd">。</span></span></h2></div><p data-role-text="description">从财务到日常工作，根据任务需要创建不同角色，让各有所长的 Bot 一起协作。</p></div>
+        <div class="role-tabs" role="tablist" aria-label="团队协作步骤">
+          <button id="step-create" type="button" role="tab" aria-selected="true" aria-controls="role-panel" tabindex="0" data-step="create"><span>01</span><strong data-role-text="create">创建 Bot</strong></button>
+          <button id="step-assign" type="button" role="tab" aria-selected="false" aria-controls="role-panel" tabindex="-1" data-step="assign"><span>02</span><strong data-role-text="assign">分配职责</strong></button>
+          <button id="step-together" type="button" role="tab" aria-selected="false" aria-controls="role-panel" tabindex="-1" data-step="together"><span>03</span><strong><span data-role-text="togetherPrefix">组队</span><span class="role-collaboration" data-role-text="togetherKeyword">协作</span></strong></button>
+        </div>
+        <div class="role-panel" id="role-panel" role="tabpanel" aria-labelledby="step-create" tabindex="0" data-active="create">
+          <div class="role-visual" aria-hidden="true"><span id="role-word">CREATE</span><strong id="role-figure">Bot</strong><span data-role-text="visualCaption">一个想法，多一位伙伴</span></div>
+          <div class="role-detail"><p class="role-kicker" id="role-kicker">从需要出发</p><h3 id="role-detail-title">每项任务，<br />都有合适的伙伴。</h3><p id="role-detail-description">从财务到日常工作，根据不同场景创建 Bot。先说清楚你想完成什么，再找到适合这项任务的伙伴。</p><p class="role-equation" id="role-equation">你的想法 <span>+</span> 合适的 Bot <strong>新的开始</strong></p></div>
+        </div>
+      </div>
+    </section>
+    <section class="closing-band" aria-labelledby="closing-title">
+      <div class="closing-inner wrap">
+        <div class="closing-copy">
+          <p class="closing-kicker" data-text="closingKicker">从一个人，到一支 AI 团队</p>
+          <h2 id="closing-title"><span data-text="closingTitleFirst">从「我」，</span><span data-text="closingTitleSecond">到「我们」。</span></h2>
+          <p class="closing-description" data-text="closingDescription">下一件想做成的事，不必一个人出发。</p>
+        </div>
+        <div class="closing-action">
+          <div class="closing-brand"><span data-text="product">小兢会计</span> <strong>Team</strong></div>
+          <p data-text="closingRelease">Windows 桌面版 · 即将上线</p>
+          <a href="#top"><span data-text="backTop">返回顶部</span><img src="./assets/lucide-arrow-up-right.svg" width="18" height="18" alt="" /></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap"><span data-text="copyright">© 2026 瑞华云数豆科技（苏州）有限公司. All rights reserved.</span><nav aria-label="相关链接"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">苏ICP备2026055624号-1</a><a href="https://beian.mps.gov.cn/#/query/webSearch?code=32059002008413" target="_blank" rel="noopener noreferrer">苏公网安备32059002008413号</a><a href="./privacy.html" data-text="privacy">隐私政策</a><a href="./terms.html" data-text="terms">服务条款</a></nav></footer>
+
+  <dialog id="image-dialog" aria-label="产品界面截图">
+    <div class="dialog-bar"><span id="dialog-label">主界面 · 浅色</span><button type="button" class="close-dialog" aria-label="关闭截图" title="关闭截图"><img src="./assets/lucide-x.svg" alt="" /></button></div>
+    <img id="dialog-image" src="./assets/xiaojing-team-home-light-20261028.png" alt="小兢会计 Team 浅色主界面" />
+  </dialog>
+</body>
+</html>
