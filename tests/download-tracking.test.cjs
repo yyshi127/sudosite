@@ -226,6 +226,23 @@ async function waitForServer() {
     ownsInstallerFixture = false;
     assert.equal((await fileRequest()).status, 404);
     assert.equal(readTotal(), 4, "Missing installer must not count");
+
+    const teamPath = "/api/download/xiaojing-team/latest";
+    const teamFile = "/downloads/Xiaojing-Team-V1.0.2-Windows-x64-20261028.exe";
+    const teamHead = await fetch(baseUrl + teamPath, { method: "HEAD", redirect: "manual" });
+    assert.equal(teamHead.status, 302);
+    assert.equal(teamHead.headers.get("location"), teamFile);
+    const teamDownload = await fetch(baseUrl + teamPath, { redirect: "manual" });
+    assert.equal(teamDownload.status, 302);
+    assert.equal(teamDownload.headers.get("location"), teamFile);
+    const teamDb = new Database(path.join(testDir, "demo-requests.sqlite"), { readonly: true });
+    try {
+      assert.equal(teamDb.prepare("SELECT download_count FROM download_stats WHERE product = 'xiaojing-team' AND version = '1.0.2'").get().download_count, 1);
+    } finally { teamDb.close(); }
+    await page.goto(`${baseUrl}/xiaojing-team.html`);
+    assert.equal(await page.locator(".download-button").getAttribute("href"), teamPath);
+    await page.locator('[data-lang="en"]').click();
+    assert.equal(await page.locator('.download-button [data-text="download"]').textContent(), "Download for Windows");
     console.log("download tracking: PASS (including direct downloads, cache headers, ranges and shared dedupe)");
   } finally {
     if (browser) await browser.close();

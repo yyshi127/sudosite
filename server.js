@@ -33,6 +33,11 @@ const downloadProducts = {
     version: "0.3.3",
     fileUrl: "/downloads/xiaojing-accounting-0.3.3-windows-x64-preview.exe",
   },
+  "xiaojing-team": {
+    name: "小兢会计 Team 版",
+    version: "1.0.2",
+    fileUrl: "/downloads/Xiaojing-Team-V1.0.2-Windows-x64-20261028.exe",
+  },
   katcat: {
     name: "Katcat.AI",
     version: "1.0.2",

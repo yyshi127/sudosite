@@ -34,7 +34,7 @@ h1 .team-badge { display: inline-block; margin-top: 3px; padding: 4px 7px; borde
 .description { max-width: 470px; margin: 25px 0 29px; color: #536970; font-size: 17px; line-height: 1.9; }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
 .download-button { display: inline-flex; justify-content: center; align-items: center; gap: 12px; min-height: 58px; padding: 0 24px; color: white; background: #12a489; border: 0; border-radius: 7px; font-weight: 700; font-size: 15px; }
-.download-button:disabled { opacity: .75; cursor: not-allowed; }
+.download-button:hover { background: #0c8b79; }
 .download-button svg { width: 21px; height: 21px; fill: currentColor; }
 .secondary-link { font-size: 14px; font-weight: 650; color: #147a6d; }
 .secondary-link span { padding-left: 7px; }
